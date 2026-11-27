@@ -13,13 +13,13 @@
   <style>
     :root {
       --bg: #f2f2f7;
-      --surface: rgba(255, 255, 255, 0.88);
       --surface-solid: #ffffff;
-      --topbar: rgba(242, 242, 247, 0.78);
-      --dock-bg: rgba(255, 255, 255, 0.82);
+      --topbar: rgba(242, 242, 247, 0.82);
+      --dock-bg: rgba(255, 255, 255, 0.85);
       --input-bg: #ffffff;
       --subtle-bg: rgba(118, 118, 128, 0.12);
       --seg-active: #ffffff;
+      --cancelled-bg: rgba(255, 59, 48, 0.09);
       --text: #1c1c1e;
       --muted: #8e8e93;
       --border: rgba(60, 60, 67, 0.12);
@@ -28,25 +28,24 @@
       --green: #34c759;
       --red: #ff3b30;
       --orange: #ff9500;
-      --shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
-      --dock-shadow: 0 10px 32px rgba(0, 0, 0, 0.12);
+      --card-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+      --dock-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
       --radius: 18px;
       --app-width: 520px;
       --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --spring: cubic-bezier(0.22, 1, 0.36, 1);
-      --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
     }
 
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]) {
         --bg: #000000;
-        --surface: rgba(28, 28, 30, 0.88);
         --surface-solid: #1c1c1e;
-        --topbar: rgba(18, 18, 20, 0.78);
-        --dock-bg: rgba(34, 34, 38, 0.84);
+        --topbar: rgba(18, 18, 20, 0.82);
+        --dock-bg: rgba(34, 34, 38, 0.86);
         --input-bg: #2c2c2e;
         --subtle-bg: rgba(118, 118, 128, 0.24);
         --seg-active: #3a3a3c;
+        --cancelled-bg: rgba(255, 69, 58, 0.14);
         --text: #f5f5f7;
         --muted: #98989d;
         --border: rgba(255, 255, 255, 0.11);
@@ -55,20 +54,20 @@
         --green: #30d158;
         --red: #ff453a;
         --orange: #ff9f0a;
-        --shadow: 0 10px 34px rgba(0, 0, 0, 0.45);
+        --card-shadow: none;
         --dock-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
       }
     }
 
     :root[data-theme="dark"] {
       --bg: #000000;
-      --surface: rgba(28, 28, 30, 0.88);
       --surface-solid: #1c1c1e;
-      --topbar: rgba(18, 18, 20, 0.78);
-      --dock-bg: rgba(34, 34, 38, 0.84);
+      --topbar: rgba(18, 18, 20, 0.82);
+      --dock-bg: rgba(34, 34, 38, 0.86);
       --input-bg: #2c2c2e;
       --subtle-bg: rgba(118, 118, 128, 0.24);
       --seg-active: #3a3a3c;
+      --cancelled-bg: rgba(255, 69, 58, 0.14);
       --text: #f5f5f7;
       --muted: #98989d;
       --border: rgba(255, 255, 255, 0.11);
@@ -77,7 +76,7 @@
       --green: #30d158;
       --red: #ff453a;
       --orange: #ff9f0a;
-      --shadow: 0 10px 34px rgba(0, 0, 0, 0.45);
+      --card-shadow: none;
       --dock-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
     }
 
@@ -91,7 +90,7 @@
       background: var(--bg);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
-      transition: background-color 0.28s ease, color 0.28s ease;
+      transition: background-color 0.24s ease, color 0.24s ease;
     }
 
     body {
@@ -103,31 +102,34 @@
     .hidden { display: none !important; }
     svg { display: block; flex-shrink: 0; }
 
-    /* Анимации появления */
-    @keyframes fadeSlideUp {
-      from { opacity: 0; transform: translateY(10px) scale(0.985); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+    /* Плавные GPU-анимации переключения */
+    @keyframes tabEnter {
+      from { opacity: 0; transform: translate3d(0, 6px, 0); }
+      to { opacity: 1; transform: translate3d(0, 0, 0); }
     }
-    @keyframes pageFade {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes daySlideNext {
+      from { opacity: 0; transform: translate3d(12px, 0, 0); }
+      to { opacity: 1; transform: translate3d(0, 0, 0); }
     }
-    @keyframes checkPop {
-      0% { transform: scale(0.8); }
-      55% { transform: scale(1.18); }
-      100% { transform: scale(1); }
-    }
-
-    .page-animate {
-      animation: pageFade 0.34s var(--spring) both;
+    @keyframes daySlidePrev {
+      from { opacity: 0; transform: translate3d(-12px, 0, 0); }
+      to { opacity: 1; transform: translate3d(0, 0, 0); }
     }
 
-    .card-animate {
-      animation: fadeSlideUp 0.36s var(--spring) both;
-      animation-delay: calc(var(--i, 0) * 32ms);
+    .tab-enter {
+      animation: tabEnter 0.22s var(--ease-ios) both;
+      will-change: transform, opacity;
+    }
+    .day-slide-next {
+      animation: daySlideNext 0.2s var(--ease-ios) both;
+      will-change: transform, opacity;
+    }
+    .day-slide-prev {
+      animation: daySlidePrev 0.2s var(--ease-ios) both;
+      will-change: transform, opacity;
     }
 
-    /* Экран авторизации (одинаковый на всех экранах) */
+    /* Авторизация */
     .auth-wrap {
       min-height: 100vh;
       display: flex;
@@ -138,28 +140,24 @@
     .auth-card {
       width: 100%;
       max-width: 390px;
-      background: var(--surface);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      border: 1px solid var(--border);
+      background: var(--surface-solid);
       border-radius: 26px;
       padding: 28px;
-      box-shadow: var(--shadow);
-      animation: fadeSlideUp 0.42s var(--spring) both;
+      box-shadow: var(--dock-shadow);
+      animation: tabEnter 0.3s var(--ease-ios) both;
     }
     .auth-card h1 { margin: 0 0 6px; font-size: 28px; font-weight: 800; letter-spacing: -0.6px; }
     .auth-card p { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
 
-    /* Верхняя панель (единый размер на всех устройствах) */
+    /* Верхняя панель */
     .topbar {
       position: sticky;
       top: 0;
       z-index: 20;
       background: var(--topbar);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
-      transition: background-color 0.28s ease, border-color 0.28s ease;
     }
     .topbar-inner {
       width: 100%;
@@ -172,7 +170,7 @@
     }
     .brand { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
 
-    /* Плавающая нижняя панель (одинаковая на ПК и телефонах) */
+    /* Нижняя плавающая панель */
     .bottom-nav-wrap {
       position: fixed;
       left: 0;
@@ -198,7 +196,6 @@
       -webkit-backdrop-filter: blur(24px);
       border: 1px solid var(--border);
       box-shadow: var(--dock-shadow);
-      transition: background-color 0.28s ease, border-color 0.28s ease;
     }
     .nav-slider {
       position: absolute;
@@ -208,8 +205,9 @@
       height: calc(100% - 10px);
       border-radius: 19px;
       background: var(--subtle-bg);
-      transform: translateX(calc(var(--idx, 0) * 100%));
-      transition: transform 0.36s var(--spring), background-color 0.25s ease;
+      transform: translate3d(calc(var(--idx, 0) * 100%), 0, 0);
+      transition: transform 0.28s var(--ease-ios);
+      will-change: transform;
       pointer-events: none;
     }
     .nav-btn {
@@ -227,18 +225,13 @@
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
-      transition: color 0.2s ease, transform 0.16s var(--spring);
+      transition: color 0.18s ease, transform 0.14s var(--ease-ios);
     }
-    .nav-btn:active { transform: scale(0.93); }
+    .nav-btn:active { transform: scale(0.94); }
     .nav-btn.active { color: var(--accent); }
-    .nav-btn svg {
-      width: 21px;
-      height: 21px;
-      transition: transform 0.3s var(--bounce);
-    }
-    .nav-btn.active svg { transform: scale(1.08); }
+    .nav-btn svg { width: 21px; height: 21px; }
 
-    /* Единый контейнер приложения */
+    /* Контейнер */
     .container {
       width: 100%;
       max-width: var(--app-width);
@@ -253,14 +246,14 @@
       align-items: center;
       gap: 7px;
       background: var(--subtle-bg);
-      border: 1px solid var(--border);
+      border: none;
       color: var(--text);
       padding: 3px 12px 3px 3px;
       border-radius: 999px;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.18s var(--spring), background-color 0.2s ease;
+      transition: transform 0.16s var(--ease-ios);
     }
     .profile-pill:active { transform: scale(0.95); }
     .avatar {
@@ -279,7 +272,7 @@
     }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-    /* Вкладки дней недели (Пн–Пт) со скользящим индикатором */
+    /* Вкладки дней недели (Пн–Пт) */
     .days-bar {
       position: relative;
       display: grid;
@@ -297,9 +290,10 @@
       height: calc(100% - 8px);
       border-radius: 10px;
       background: var(--seg-active);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-      transform: translateX(calc(var(--idx, 0) * 100%));
-      transition: transform 0.34s var(--spring), background-color 0.25s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      transform: translate3d(calc(var(--idx, 0) * 100%), 0, 0);
+      transition: transform 0.26s var(--ease-ios);
+      will-change: transform;
       pointer-events: none;
     }
     .day-btn {
@@ -314,12 +308,11 @@
       color: var(--muted);
       cursor: pointer;
       text-align: center;
-      transition: color 0.2s ease, transform 0.15s ease;
+      transition: color 0.18s ease;
     }
-    .day-btn:active { transform: scale(0.94); }
     .day-btn.active { color: var(--text); }
 
-    /* Переключатель темы со скользящим индикатором */
+    /* Переключатель темы */
     .segmented {
       position: relative;
       display: grid;
@@ -337,9 +330,10 @@
       height: calc(100% - 6px);
       border-radius: 9px;
       background: var(--seg-active);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
-      transform: translateX(calc(var(--idx, 0) * 100%));
-      transition: transform 0.32s var(--spring), background-color 0.25s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      transform: translate3d(calc(var(--idx, 0) * 100%), 0, 0);
+      transition: transform 0.26s var(--ease-ios);
+      will-change: transform;
       pointer-events: none;
     }
     .segmented button {
@@ -353,7 +347,7 @@
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: color 0.2s ease;
+      transition: color 0.18s ease;
     }
     .segmented button.active { color: var(--text); }
 
@@ -369,6 +363,7 @@
     /* Поля и кнопки */
     .field { display: flex; flex-direction: column; gap: 6px; }
     .field label { font-size: 13px; font-weight: 600; color: var(--muted); }
+    .field-hint { font-size: 12px; color: var(--accent); margin-top: 2px; }
     input, textarea, select {
       width: 100%;
       padding: 11px 13px;
@@ -379,7 +374,7 @@
       font-family: inherit;
       color: var(--text);
       outline: none;
-      transition: border-color 0.2s ease, background-color 0.25s ease, box-shadow 0.2s ease;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
     }
     input:focus, textarea:focus, select:focus {
       border-color: var(--accent);
@@ -400,7 +395,7 @@
       cursor: pointer;
       background: var(--accent);
       color: #fff;
-      transition: transform 0.16s var(--spring), background-color 0.2s ease, opacity 0.2s ease;
+      transition: transform 0.14s var(--ease-ios), opacity 0.18s ease;
     }
     .btn:active { transform: scale(0.95); }
     .btn.secondary { background: var(--subtle-bg); color: var(--text); }
@@ -411,27 +406,23 @@
     .stack { display: flex; flex-direction: column; gap: 12px; }
     .row { display: flex; gap: 10px; align-items: center; }
 
-    /* Карточки уроков */
+    /* Карточки уроков (без обводки) */
     .lesson-list { display: flex; flex-direction: column; gap: 9px; }
     .lesson-card {
       display: flex;
       align-items: center;
       gap: 12px;
-      background: var(--surface);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border);
+      background: var(--surface-solid);
+      border: none;
+      box-shadow: var(--card-shadow);
       border-radius: var(--radius);
-      padding: 13px 14px;
+      padding: 13px 15px;
       cursor: pointer;
-      transition: transform 0.2s var(--spring), box-shadow 0.2s ease, background-color 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
+      transition: transform 0.16s var(--ease-ios), opacity 0.2s ease, background-color 0.2s ease;
     }
-    .lesson-card:active { transform: scale(0.98); }
-    .lesson-card.cancelled {
-      background: rgba(255, 59, 48, 0.07);
-      border-color: rgba(255, 59, 48, 0.26);
-    }
-    .lesson-card.done { opacity: 0.72; }
+    .lesson-card:active { transform: scale(0.985); }
+    .lesson-card.cancelled { background: var(--cancelled-bg); }
+    .lesson-card.done { opacity: 0.65; }
     .lesson-card.done .lesson-title span:first-child {
       text-decoration: line-through;
       color: var(--muted);
@@ -450,14 +441,10 @@
       cursor: pointer;
       padding: 0;
       color: #fff;
-      transition: background-color 0.22s ease, border-color 0.22s ease, transform 0.18s var(--spring);
+      transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.16s var(--ease-ios);
     }
     .check-btn:active { transform: scale(0.86); }
-    .check-btn.checked {
-      background: var(--green);
-      border-color: var(--green);
-      animation: checkPop 0.34s var(--bounce);
-    }
+    .check-btn.checked { background: var(--green); border-color: var(--green); }
 
     .lesson-num {
       width: 27px;
@@ -473,7 +460,7 @@
       justify-content: center;
     }
     .lesson-card.cancelled .lesson-num {
-      background: rgba(255, 59, 48, 0.14);
+      background: rgba(255, 59, 48, 0.15);
       color: var(--red);
     }
     .lesson-info { flex: 1; min-width: 0; }
@@ -496,23 +483,23 @@
     .badge.orange { background: rgba(255, 149, 0, 0.16); color: var(--orange); }
     .badge.gray { background: var(--subtle-bg); color: var(--muted); }
 
-    /* Карточки участников */
+    /* Карточки участников (тоже чистые, без обводки) */
     .member-card {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: var(--surface-solid);
+      border: none;
+      box-shadow: var(--card-shadow);
       border-radius: var(--radius);
       padding: 12px 14px;
-      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
     .member-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .member-name { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .member-email { font-size: 12px; color: var(--muted); margin-top: 1px; }
 
-    /* Единое всплывающее окно (одинаковое на всех устройствах) */
+    /* Модальное окно */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -527,7 +514,7 @@
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      transition: opacity 0.26s ease, visibility 0.26s ease;
+      transition: opacity 0.22s ease, visibility 0.22s ease;
     }
     .modal-backdrop.open {
       opacity: 1;
@@ -540,16 +527,16 @@
       max-height: 88vh;
       overflow-y: auto;
       background: var(--surface-solid);
-      border: 1px solid var(--border);
       border-radius: 24px;
       padding: 20px;
-      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.28);
-      transform: translateY(22px) scale(0.95);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.3);
+      transform: translate3d(0, 18px, 0) scale(0.96);
       opacity: 0;
-      transition: transform 0.36s var(--spring), opacity 0.24s ease, background-color 0.25s ease;
+      transition: transform 0.28s var(--ease-ios), opacity 0.2s ease;
+      will-change: transform, opacity;
     }
     .modal-backdrop.open .modal {
-      transform: translateY(0) scale(1);
+      transform: translate3d(0, 0, 0) scale(1);
       opacity: 1;
     }
 
@@ -567,23 +554,13 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      transition: transform 0.16s var(--spring), background-color 0.2s ease;
     }
-    .close-x:active { transform: scale(0.88); }
-    .hw-box { background: var(--bg); border: 1px solid var(--border); padding: 12px 14px; border-radius: 14px; font-size: 15px; line-height: 1.45; white-space: pre-wrap; margin-bottom: 12px; }
+    .hw-box { background: var(--bg); padding: 12px 14px; border-radius: 14px; font-size: 15px; line-height: 1.45; white-space: pre-wrap; margin-bottom: 12px; }
 
     /* Фотографии */
     .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 7px; margin-bottom: 8px; }
-    .photo-item {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      aspect-ratio: 1;
-      background: var(--subtle-bg);
-      animation: fadeSlideUp 0.28s var(--spring) both;
-    }
-    .photo-item img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; transition: transform 0.2s ease; }
-    .photo-item img:active { transform: scale(0.96); }
+    .photo-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; background: var(--subtle-bg); }
+    .photo-item img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
     .photo-del {
       position: absolute;
       top: 4px;
@@ -613,22 +590,18 @@
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
     }
-    .upload-zone:active { transform: scale(0.98); }
 
     .empty {
       text-align: center;
       padding: 36px 16px;
       color: var(--muted);
-      background: var(--surface);
-      border: 1px dashed var(--border);
+      background: var(--surface-solid);
       border-radius: var(--radius);
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 10px;
-      animation: fadeSlideUp 0.3s var(--spring) both;
     }
     .msg { font-size: 12px; color: var(--red); min-height: 16px; }
     .msg.ok { color: var(--green); }
@@ -638,7 +611,6 @@
       gap: 10px;
       padding: 11px 13px;
       background: var(--bg);
-      border: 1px solid var(--border);
       border-radius: 12px;
       font-size: 14px;
       font-weight: 500;
@@ -651,7 +623,6 @@
       align-items: center;
       gap: 14px;
       background: var(--bg);
-      border: 1px solid var(--border);
       padding: 12px;
       border-radius: 14px;
     }
@@ -671,7 +642,7 @@
     }
     .avatar-large img { width: 100%; height: 100%; object-fit: cover; }
 
-    /* Лайтбокс с плавным зумом */
+    /* Лайтбокс */
     .lightbox {
       position: fixed;
       inset: 0;
@@ -687,7 +658,7 @@
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      transition: opacity 0.26s ease, visibility 0.26s ease;
+      transition: opacity 0.22s ease, visibility 0.22s ease;
     }
     .lightbox.open {
       opacity: 1;
@@ -698,8 +669,8 @@
       max-width: 100%;
       max-height: 90vh;
       border-radius: 14px;
-      transform: scale(0.92);
-      transition: transform 0.34s var(--spring);
+      transform: scale(0.94);
+      transition: transform 0.26s var(--ease-ios);
     }
     .lightbox.open img { transform: scale(1); }
   </style>
@@ -736,7 +707,7 @@
 
     <main class="container">
       <!-- СТРАНИЦА ДЗ -->
-      <section id="pageHw" class="page-animate">
+      <section id="pageHw">
         <div class="days-bar" id="daysBar">
           <div class="day-slider" id="daySlider"></div>
         </div>
@@ -760,7 +731,7 @@
       </section>
     </main>
 
-    <!-- ЕДИНАЯ ПЛАВАЮЩАЯ НИЖНЯЯ НАВИГАЦИЯ -->
+    <!-- ПЛАВАЮЩАЯ НИЖНЯЯ НАВИГАЦИЯ -->
     <div class="bottom-nav-wrap">
       <nav class="bottom-nav">
         <div class="nav-slider" id="navSlider"></div>
@@ -840,7 +811,33 @@
       6: '12:35 - 13:15',
       7: '13:25 - 14:05',
       8: '14:15 - 14:55',
-      9: '15:05 - 15:45'
+      9: '15:05 - 15:45',
+      10: '15:55 - 16:35'
+    };
+
+    // Словарь для автоподстановки учителей по предмету
+    const SUBJECT_TEACHERS = {
+      'разговор о важном': 'Захарова И.Б.',
+      'англ. язык': 'Милова В.В.',
+      'английский язык': 'Милова В.В.',
+      'русский язык': 'Тихонькова Т.Н.',
+      'физика': 'Некратова Е.Ф.',
+      'литература': 'Тихонькова Т.Н.',
+      'алгебра': 'Некратова Е.Ф.',
+      'проектная деятельность': 'Вахрушева О.В.',
+      'обществознание': 'Бурнашова Н.Г.',
+      'физкультура': 'Захарова И.Б.',
+      'физическая культура': 'Захарова И.Б.',
+      'геометрия': 'Некратова Е.Ф.',
+      'информатика': 'Григорьева Н.В.',
+      'история': 'Бурнашова Н.Г.',
+      'биология': 'Ефимова Г.В.',
+      'химия': 'Авдеева Т.Д.',
+      'россия — мои горизонты': 'Захарова И.Б.',
+      'география': 'Ветрова Е.В.',
+      'обзр': 'Мазильникова Л.',
+      'вероятность и статистика': 'Некратова Е.Ф.',
+      'вер. и ст.': 'Некратова Е.Ф.'
     };
 
     const ICON = {
@@ -857,6 +854,7 @@
     let currentProfile = null;
     let currentPage = 'hw';
     let lessonsCache = [];
+    let membersCache = [];
     let completedSet = new Set();
     let daysInitialized = false;
 
@@ -912,6 +910,11 @@
       }[m]));
     }
 
+    function playAnim(el, cls) {
+      el.classList.remove('tab-enter', 'day-slide-next', 'day-slide-prev');
+      requestAnimationFrame(() => el.classList.add(cls));
+    }
+
     // --- AUTH ---
     db.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
@@ -921,8 +924,7 @@
         document.getElementById('appView').classList.remove('hidden');
         initDaysBar();
         updateDaysUI();
-        await loadHwData();
-        if (currentPage === 'members') await loadMembers();
+        await Promise.all([loadHwData(), loadMembers()]);
       } else {
         currentUser = null;
         currentProfile = null;
@@ -1069,6 +1071,7 @@
         if (prev) prev.innerHTML = `<img src="${esc(pub.publicUrl)}" alt="" />`;
         msg.className = 'msg ok';
         msg.textContent = 'Фото профиля обновлено!';
+        loadMembers(true);
       } catch (err) {
         msg.textContent = 'Ошибка: ' + err.message;
       }
@@ -1085,21 +1088,20 @@
       if (error) { msg.textContent = error.message; return; }
 
       await loadMyProfile();
-      if (currentPage === 'members') await loadMembers();
+      loadMembers(true);
       msg.className = 'msg ok';
       msg.textContent = 'Сохранено!';
     }
 
-    // --- НАВИГАЦИЯ ---
+    // --- ПЛАВНАЯ НАВИГАЦИЯ БЕЗ ДЕРГАНИЯ ---
     function switchPage(page) {
       if (currentPage === page) return;
       currentPage = page;
 
       const pageHw = document.getElementById('pageHw');
       const pageMembers = document.getElementById('pageMembers');
-      const slider = document.getElementById('navSlider');
 
-      slider.style.setProperty('--idx', page === 'hw' ? 0 : 1);
+      document.getElementById('navSlider').style.setProperty('--idx', page === 'hw' ? 0 : 1);
       document.getElementById('navHw').classList.toggle('active', page === 'hw');
       document.getElementById('navMembers').classList.toggle('active', page === 'members');
 
@@ -1107,12 +1109,11 @@
       pageMembers.classList.toggle('hidden', page !== 'members');
 
       const activeSec = page === 'hw' ? pageHw : pageMembers;
-      activeSec.classList.remove('page-animate');
-      void activeSec.offsetWidth;
-      activeSec.classList.add('page-animate');
+      playAnim(activeSec, 'tab-enter');
 
-      if (page === 'hw') loadHwData();
-      else loadMembers();
+      // Обновляем данные тихо в фоне, чтобы экран не прыгал повторно
+      if (page === 'hw') loadHwData(true);
+      else loadMembers(true);
     }
 
     function initDaysBar() {
@@ -1140,23 +1141,33 @@
 
     function selectDay(dayId) {
       if (selectedDay === dayId) return;
+      const dirClass = dayId > selectedDay ? 'day-slide-next' : 'day-slide-prev';
       selectedDay = dayId;
       updateDaysUI();
-      renderLessons(true);
+      renderLessons();
+      playAnim(document.getElementById('lessonsList'), dirClass);
     }
 
     // --- УРОКИ И ДЗ ---
-    async function loadHwData() {
+    async function loadHwData(silent = false) {
       const [lessonsRes, compRes] = await Promise.all([
         db.from('lessons').select('*').order('lesson_number', { ascending: true }).order('id', { ascending: true }),
         db.from('user_completions').select('lesson_id').eq('user_id', currentUser.id).eq('completed', true)
       ]);
-      lessonsCache = lessonsRes.data || [];
-      completedSet = new Set((compRes.data || []).map(r => r.lesson_id));
-      renderLessons(true);
+      const newLessons = lessonsRes.data || [];
+      const newCompArr = (compRes.data || []).map(r => r.lesson_id);
+
+      const changed = !silent
+        || JSON.stringify(newLessons) !== JSON.stringify(lessonsCache)
+        || JSON.stringify(newCompArr) !== JSON.stringify([...completedSet]);
+
+      lessonsCache = newLessons;
+      completedSet = new Set(newCompArr);
+
+      if (changed) renderLessons();
     }
 
-    function renderLessons(animate = false) {
+    function renderLessons() {
       const list = document.getElementById('lessonsList');
       const dayLessons = lessonsCache.filter(l => l.day_of_week === selectedDay);
 
@@ -1170,14 +1181,14 @@
         return;
       }
 
-      list.innerHTML = dayLessons.map((l, idx) => {
+      list.innerHTML = dayLessons.map(l => {
         const done = completedSet.has(l.id);
         const photosCount = (l.photo_urls || []).length;
         const meta = [l.lesson_time, l.teacher].filter(Boolean).map(esc).join(' · ');
 
         return `
-          <div class="lesson-card ${animate ? 'card-animate' : ''} ${l.is_cancelled ? 'cancelled' : ''} ${done ? 'done' : ''}"
-               style="--i:${idx}" data-lesson-id="${l.id}" onclick="openLessonModal(${l.id})">
+          <div class="lesson-card ${l.is_cancelled ? 'cancelled' : ''} ${done ? 'done' : ''}"
+               data-lesson-id="${l.id}" onclick="openLessonModal(${l.id})">
             <button class="check-btn ${done ? 'checked' : ''}" onclick="event.stopPropagation(); toggleDone(${l.id})">
               ${done ? ICON.check : ''}
             </button>
@@ -1211,6 +1222,59 @@
         card?.classList.add('done');
         if (checkBtn) { checkBtn.classList.add('checked'); checkBtn.innerHTML = ICON.check; }
         await db.from('user_completions').upsert({ user_id: currentUser.id, lesson_id: lessonId, completed: true });
+      }
+    }
+
+    // --- АВТОПОДБОР УЧИТЕЛЯ И ПОДСКАЗКА СДВИГА ---
+    function getTeacherMap() {
+      const map = { ...SUBJECT_TEACHERS };
+      for (const l of lessonsCache) {
+        if (l.subject && l.teacher) {
+          const key = l.subject.trim().toLowerCase();
+          if (!map[key]) map[key] = l.teacher.trim();
+        }
+      }
+      return map;
+    }
+
+    function autoFillTeacher(subjectValue) {
+      const teacherInput = document.getElementById('edTeacher');
+      if (!teacherInput) return;
+      const q = subjectValue.trim().toLowerCase();
+      if (!q) return;
+
+      const map = getTeacherMap();
+      if (map[q]) {
+        teacherInput.value = map[q];
+        return;
+      }
+      if (q.length >= 3) {
+        const matches = Object.entries(map).filter(([subj]) => subj.startsWith(q));
+        const uniqueTeachers = [...new Set(matches.map(([, t]) => t))];
+        if (uniqueTeachers.length === 1) {
+          teacherInput.value = uniqueTeachers[0];
+        }
+      }
+    }
+
+    function updateShiftHint(editingId) {
+      const hint = document.getElementById('shiftHint');
+      if (!hint) return;
+      const dayVal = parseInt(document.getElementById('edDay').value, 10);
+      const numVal = parseInt(document.getElementById('edNum').value, 10);
+      const oldLesson = editingId ? lessonsCache.find(x => x.id === editingId) : null;
+      const posChanged = !oldLesson || oldLesson.day_of_week !== dayVal || oldLesson.lesson_number !== numVal;
+
+      const hasCollision = posChanged && lessonsCache.some(
+        l => l.day_of_week === dayVal && l.id !== editingId && l.lesson_number === numVal
+      );
+
+      if (hasCollision) {
+        hint.textContent = `Урок №${numVal} уже есть — этот и последующие уроки автоматически сдвинутся на +1`;
+        hint.classList.remove('hidden');
+      } else {
+        hint.textContent = '';
+        hint.classList.add('hidden');
       }
     }
 
@@ -1254,10 +1318,12 @@
       editingPhotos = l ? [...(l.photo_urls || [])] : [];
       pendingFiles = [];
       const dayVal = l ? l.day_of_week : selectedDay;
-      const nextNum = lessonsCache.filter(x => x.day_of_week === dayVal).length + 1;
-      const numVal = l ? l.lesson_number : nextNum;
+      const dayLessons = lessonsCache.filter(x => x.day_of_week === dayVal);
+      const maxNum = dayLessons.length ? Math.max(...dayLessons.map(x => x.lesson_number)) : 0;
+      const numVal = l ? l.lesson_number : maxNum + 1;
       const timeVal = l ? l.lesson_time : (LESSON_TIMES[numVal] || '');
       const done = l ? completedSet.has(l.id) : false;
+      const idArg = l ? l.id : 'null';
 
       document.getElementById('modalContent').innerHTML = `
         <div class="modal-head">
@@ -1272,28 +1338,36 @@
             </button>
           ` : ''}
 
-          <div class="row">
-            <div class="field" style="flex:1;">
-              <label>День недели</label>
-              <select id="edDay">
-                ${DAYS.map(d => `<option value="${d.id}" ${d.id === dayVal ? 'selected' : ''}>${d.full}</option>`).join('')}
-              </select>
+          <div>
+            <div class="row">
+              <div class="field" style="flex:1;">
+                <label>День недели</label>
+                <select id="edDay" onchange="updateShiftHint(${idArg})">
+                  ${DAYS.map(d => `<option value="${d.id}" ${d.id === dayVal ? 'selected' : ''}>${d.full}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field" style="width:88px;">
+                <label>Урок №</label>
+                <input id="edNum" type="number" min="1" max="12" value="${numVal}"
+                  oninput="autoFillTime(this.value); updateShiftHint(${idArg})" />
+              </div>
             </div>
-            <div class="field" style="width:88px;">
-              <label>Урок №</label>
-              <input id="edNum" type="number" min="1" max="12" value="${numVal}" onchange="autoFillTime(this.value)" />
-            </div>
+            <div id="shiftHint" class="field-hint hidden"></div>
           </div>
 
           <div class="field">
             <label>Предмет</label>
-            <input id="edSubj" list="subjectSuggestions" type="text" value="${l ? esc(l.subject) : ''}" placeholder="Например: Физика" />
+            <input id="edSubj" list="subjectSuggestions" type="text"
+              value="${l ? esc(l.subject) : ''}"
+              placeholder="Начните вводить предмет..."
+              oninput="autoFillTeacher(this.value)"
+              onchange="autoFillTeacher(this.value)" />
           </div>
 
           <div class="row">
             <div class="field" style="flex:1;">
               <label>Учитель</label>
-              <input id="edTeacher" type="text" value="${l ? esc(l.teacher) : ''}" placeholder="Фамилия И.О." />
+              <input id="edTeacher" type="text" value="${l ? esc(l.teacher) : ''}" placeholder="Подставляется автоматически" />
             </div>
             <div class="field" style="width:135px;">
               <label>Время</label>
@@ -1327,12 +1401,13 @@
             ${l ? `<button class="btn danger sm" onclick="deleteLesson(${l.id})">${ICON.trash}<span>Удалить</span></button>` : '<span></span>'}
             <div class="row" style="gap:6px;">
               <button class="btn secondary sm" onclick="closeModal()">Отмена</button>
-              <button id="saveLessonBtn" class="btn sm" onclick="saveLesson(${l ? l.id : 'null'})">Сохранить</button>
+              <button id="saveLessonBtn" class="btn sm" onclick="saveLesson(${idArg})">Сохранить</button>
             </div>
           </div>
         </div>
       `;
       renderEditingPhotos();
+      updateShiftHint(l ? l.id : null);
       openModal();
     }
 
@@ -1410,6 +1485,31 @@
           editingPhotos.push(pub.publicUrl);
         }
 
+        // Автосдвиг расписания на +1, если номер урока уже занят
+        const oldLesson = lessonId ? lessonsCache.find(x => x.id === lessonId) : null;
+        const positionChanged = !oldLesson || oldLesson.day_of_week !== day_of_week || oldLesson.lesson_number !== lesson_number;
+
+        if (positionChanged) {
+          const sameDayOthers = lessonsCache.filter(l => l.day_of_week === day_of_week && l.id !== lessonId);
+          const hasCollision = sameDayOthers.some(l => l.lesson_number === lesson_number);
+
+          if (hasCollision) {
+            const toShift = sameDayOthers
+              .filter(l => l.lesson_number >= lesson_number)
+              .sort((a, b) => b.lesson_number - a.lesson_number);
+
+            const shiftResults = await Promise.all(toShift.map(item => {
+              const nextNum = item.lesson_number + 1;
+              const patch = { lesson_number: nextNum };
+              if (LESSON_TIMES[nextNum]) patch.lesson_time = LESSON_TIMES[nextNum];
+              return db.from('lessons').update(patch).eq('id', item.id);
+            }));
+
+            const shiftErr = shiftResults.find(r => r.error)?.error;
+            if (shiftErr) throw shiftErr;
+          }
+        }
+
         const payload = { day_of_week, lesson_number, subject, teacher, lesson_time, homework, is_cancelled, photo_urls: editingPhotos };
         const { error } = lessonId
           ? await db.from('lessons').update(payload).eq('id', lessonId)
@@ -1454,28 +1554,38 @@
     }
 
     // --- УЧАСТНИКИ ---
-    async function loadMembers() {
+    async function loadMembers(silent = false) {
       const { data, error } = await db.from('profiles').select('*').order('created_at', { ascending: true });
       const list = document.getElementById('membersList');
-      if (error) { list.innerHTML = `<div class="empty">${esc(error.message)}</div>`; return; }
+      if (error) {
+        if (!silent) list.innerHTML = `<div class="empty">${esc(error.message)}</div>`;
+        return;
+      }
 
       const order = { super_admin: 0, admin: 1, user: 2 };
       data.sort((a, b) => order[a.role] - order[b.role]);
 
+      if (silent && JSON.stringify(data) === JSON.stringify(membersCache)) return;
+      membersCache = data;
+      renderMembers();
+    }
+
+    function renderMembers() {
+      const list = document.getElementById('membersList');
       const labels = {
         super_admin: '<span class="badge orange">Главный админ</span>',
         admin: '<span class="badge blue">Админ</span>',
         user: '<span class="badge gray">Ученик</span>'
       };
 
-      list.innerHTML = data.map((u, idx) => {
+      list.innerHTML = membersCache.map(u => {
         const canManage = isSuperAdmin() && u.role !== 'super_admin' && u.id !== currentUser.id;
         const avatarHtml = u.avatar_url
           ? `<img src="${esc(u.avatar_url)}" alt="" />`
           : (u.full_name[0] || '?').toUpperCase();
 
         return `
-          <div class="member-card card-animate" style="--i:${idx}">
+          <div class="member-card">
             <div class="member-info">
               <div class="avatar" style="width:36px; height:36px; font-size:14px;">${avatarHtml}</div>
               <div>
