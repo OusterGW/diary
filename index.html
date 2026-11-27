@@ -8,17 +8,59 @@
   <style>
     :root {
       --bg: #f2f2f7;
-      --surface: rgba(255, 255, 255, 0.86);
+      --surface: rgba(255, 255, 255, 0.85);
       --surface-solid: #ffffff;
+      --topbar: rgba(242, 242, 247, 0.82);
+      --input-bg: #ffffff;
+      --subtle-bg: rgba(118, 118, 128, 0.12);
       --text: #1c1c1e;
-      --muted: #8e8e93;
-      --border: rgba(60, 60, 67, 0.12);
+      --muted: #6e6e73;
+      --border: rgba(60, 60, 67, 0.13);
       --accent: #007aff;
       --accent-hover: #0062cc;
       --green: #34c759;
       --red: #ff3b30;
       --orange: #ff9500;
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
       --radius: 16px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #000000;
+        --surface: rgba(28, 28, 30, 0.86);
+        --surface-solid: #1c1c1e;
+        --topbar: rgba(20, 20, 22, 0.82);
+        --input-bg: #2c2c2e;
+        --subtle-bg: rgba(118, 118, 128, 0.24);
+        --text: #f5f5f7;
+        --muted: #98989d;
+        --border: rgba(255, 255, 255, 0.12);
+        --accent: #0a84ff;
+        --accent-hover: #409cff;
+        --green: #30d158;
+        --red: #ff453a;
+        --orange: #ff9f0a;
+        --shadow: 0 10px 34px rgba(0, 0, 0, 0.45);
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #000000;
+      --surface: rgba(28, 28, 30, 0.86);
+      --surface-solid: #1c1c1e;
+      --topbar: rgba(20, 20, 22, 0.82);
+      --input-bg: #2c2c2e;
+      --subtle-bg: rgba(118, 118, 128, 0.24);
+      --text: #f5f5f7;
+      --muted: #98989d;
+      --border: rgba(255, 255, 255, 0.12);
+      --accent: #0a84ff;
+      --accent-hover: #409cff;
+      --green: #30d158;
+      --red: #ff453a;
+      --orange: #ff9f0a;
+      --shadow: 0 10px 34px rgba(0, 0, 0, 0.45);
     }
 
     * { box-sizing: border-box; }
@@ -29,6 +71,7 @@
       color: var(--text);
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
+      transition: background 0.2s ease, color 0.2s ease;
     }
 
     .hidden { display: none !important; }
@@ -50,58 +93,86 @@
       border: 1px solid var(--border);
       border-radius: 22px;
       padding: 28px;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+      box-shadow: var(--shadow);
     }
     .auth-card h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.4px; }
     .auth-card p { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
 
-    /* Header & Nav */
+    /* Header */
     .topbar {
       position: sticky;
       top: 0;
       z-index: 20;
-      background: rgba(242, 242, 247, 0.8);
+      background: var(--topbar);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
     }
     .topbar-inner {
-      max-width: 760px;
+      max-width: 780px;
       margin: 0 auto;
       padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
     }
     .brand { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
     .segmented {
       display: inline-flex;
-      background: rgba(118, 118, 128, 0.14);
+      background: var(--subtle-bg);
       padding: 3px;
       border-radius: 12px;
       gap: 2px;
     }
     .segmented button {
       background: transparent;
-      color: var(--text);
+      color: var(--muted);
       border: none;
-      padding: 7px 16px;
+      padding: 7px 14px;
       border-radius: 9px;
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;
-      transition: 0.18s ease;
+      transition: 0.16s ease;
     }
     .segmented button.active {
       background: var(--surface-solid);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .profile-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--subtle-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 5px 11px 5px 6px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .profile-pill:hover { opacity: 0.85; }
+    .avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
     }
 
     .container {
-      max-width: 760px;
+      max-width: 780px;
       margin: 0 auto;
-      padding: 18px 16px 60px;
+      padding: 18px 16px 70px;
     }
 
     /* Days Tabs */
@@ -109,7 +180,7 @@
       display: grid;
       grid-template-columns: repeat(6, 1fr);
       gap: 6px;
-      background: rgba(118, 118, 128, 0.12);
+      background: var(--subtle-bg);
       padding: 4px;
       border-radius: 14px;
       margin-bottom: 18px;
@@ -128,32 +199,34 @@
     .day-btn.active {
       background: var(--surface-solid);
       color: var(--text);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
-    /* Section Header */
     .section-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      gap: 12px;
+      margin-bottom: 14px;
     }
-    .section-head h2 { margin: 0; font-size: 20px; letter-spacing: -0.3px; }
+    .section-head h2 { margin: 0; font-size: 21px; letter-spacing: -0.3px; }
 
-    /* Inputs & Buttons */
+    /* Form Controls */
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 13px; font-weight: 600; color: var(--muted); }
     input, textarea, select {
       width: 100%;
       padding: 11px 14px;
       border: 1px solid var(--border);
       border-radius: 12px;
-      background: var(--surface-solid);
+      background: var(--input-bg);
       font-size: 15px;
       font-family: inherit;
       color: var(--text);
       outline: none;
     }
     input:focus, textarea:focus, select:focus { border-color: var(--accent); }
-    textarea { resize: vertical; min-height: 90px; }
+    textarea { resize: vertical; min-height: 92px; }
 
     .btn {
       display: inline-flex;
@@ -171,14 +244,15 @@
       transition: 0.15s;
     }
     .btn:hover { background: var(--accent-hover); }
-    .btn.secondary { background: rgba(118, 118, 128, 0.14); color: var(--text); }
-    .btn.secondary:hover { background: rgba(118, 118, 128, 0.22); }
-    .btn.danger { background: rgba(255, 59, 48, 0.12); color: var(--red); }
-    .btn.danger:hover { background: rgba(255, 59, 48, 0.2); }
-    .btn.sm { padding: 6px 12px; font-size: 13px; border-radius: 10px; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn.secondary { background: var(--subtle-bg); color: var(--text); }
+    .btn.secondary:hover { opacity: 0.85; }
+    .btn.danger { background: rgba(255, 59, 48, 0.14); color: var(--red); }
+    .btn.danger:hover { background: rgba(255, 59, 48, 0.22); }
+    .btn.sm { padding: 7px 13px; font-size: 13px; border-radius: 10px; }
 
-    .stack { display: flex; flex-direction: column; gap: 10px; }
-    .row { display: flex; gap: 8px; align-items: center; }
+    .stack { display: flex; flex-direction: column; gap: 12px; }
+    .row { display: flex; gap: 10px; align-items: center; }
 
     /* Lesson Cards */
     .lesson-list { display: flex; flex-direction: column; gap: 10px; }
@@ -195,25 +269,24 @@
       transition: transform 0.12s ease, box-shadow 0.15s ease;
     }
     .lesson-card:hover {
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+      box-shadow: var(--shadow);
       transform: translateY(-1px);
     }
     .lesson-card.cancelled {
-      background: rgba(255, 59, 48, 0.05);
-      border-color: rgba(255, 59, 48, 0.22);
+      background: rgba(255, 59, 48, 0.08);
+      border-color: rgba(255, 59, 48, 0.28);
     }
     .lesson-card.done .lesson-title {
       text-decoration: line-through;
       color: var(--muted);
     }
 
-    /* Custom Checkbox */
     .check-btn {
       width: 24px;
       height: 24px;
       min-width: 24px;
       border-radius: 50%;
-      border: 2px solid #c7c7cc;
+      border: 2px solid var(--muted);
       background: transparent;
       display: flex;
       align-items: center;
@@ -224,17 +297,14 @@
       font-size: 13px;
       transition: 0.15s;
     }
-    .check-btn.checked {
-      background: var(--green);
-      border-color: var(--green);
-    }
+    .check-btn.checked { background: var(--green); border-color: var(--green); }
 
     .lesson-num {
       width: 28px;
       height: 28px;
       min-width: 28px;
       border-radius: 9px;
-      background: rgba(0, 122, 255, 0.1);
+      background: rgba(0, 122, 255, 0.14);
       color: var(--accent);
       font-weight: 700;
       font-size: 14px;
@@ -243,7 +313,7 @@
       justify-content: center;
     }
     .lesson-card.cancelled .lesson-num {
-      background: rgba(255, 59, 48, 0.12);
+      background: rgba(255, 59, 48, 0.16);
       color: var(--red);
     }
     .lesson-info { flex: 1; min-width: 0; }
@@ -272,10 +342,10 @@
       font-size: 11px;
       font-weight: 600;
     }
-    .badge.red { background: rgba(255, 59, 48, 0.14); color: var(--red); }
-    .badge.blue { background: rgba(0, 122, 255, 0.14); color: var(--accent); }
-    .badge.orange { background: rgba(255, 149, 0, 0.16); color: #c77400; }
-    .badge.gray { background: rgba(142, 142, 147, 0.16); color: #636366; }
+    .badge.red { background: rgba(255, 59, 48, 0.16); color: var(--red); }
+    .badge.blue { background: rgba(0, 122, 255, 0.16); color: var(--accent); }
+    .badge.orange { background: rgba(255, 149, 0, 0.18); color: var(--orange); }
+    .badge.gray { background: var(--subtle-bg); color: var(--muted); }
 
     /* Members */
     .member-card {
@@ -288,15 +358,15 @@
       border-radius: var(--radius);
       padding: 14px 16px;
     }
-    .member-name { font-weight: 600; font-size: 15px; }
-    .member-email { font-size: 13px; color: var(--muted); }
+    .member-name { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .member-email { font-size: 13px; color: var(--muted); margin-top: 2px; }
 
     /* Modal */
     .modal-backdrop {
       position: fixed;
       inset: 0;
       z-index: 50;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0, 0, 0, 0.45);
       backdrop-filter: blur(6px);
       display: flex;
       align-items: center;
@@ -309,30 +379,32 @@
       max-height: 90vh;
       overflow-y: auto;
       background: var(--surface-solid);
+      border: 1px solid var(--border);
       border-radius: 22px;
       padding: 22px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
     }
     .modal-head {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       gap: 12px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
     .modal-head h3 { margin: 0; font-size: 20px; }
     .close-x {
-      background: rgba(118, 118, 128, 0.14);
+      background: var(--subtle-bg);
       border: none;
       width: 30px;
       height: 30px;
       border-radius: 50%;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 15px;
       color: var(--text);
     }
     .hw-box {
       background: var(--bg);
+      border: 1px solid var(--border);
       padding: 14px;
       border-radius: 14px;
       font-size: 15px;
@@ -340,18 +412,37 @@
       white-space: pre-wrap;
       margin-bottom: 14px;
     }
+
+    /* Photo upload & grid */
+    .upload-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 16px;
+      border: 1.5px dashed var(--border);
+      border-radius: 14px;
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 14px;
+      cursor: pointer;
+      text-align: center;
+      transition: 0.15s;
+    }
+    .upload-zone:hover { border-color: var(--accent); color: var(--accent); }
     .photo-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
       gap: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
     .photo-item {
       position: relative;
       border-radius: 12px;
       overflow: hidden;
       aspect-ratio: 1;
-      background: #e5e5ea;
+      background: var(--subtle-bg);
     }
     .photo-item img {
       width: 100%;
@@ -368,53 +459,62 @@
       height: 24px;
       border-radius: 50%;
       border: none;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(0, 0, 0, 0.7);
       color: #fff;
       cursor: pointer;
       font-size: 12px;
     }
 
-    /* Lightbox */
     .lightbox {
       position: fixed;
       inset: 0;
       z-index: 80;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0, 0, 0, 0.92);
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
       cursor: zoom-out;
     }
-    .lightbox img {
-      max-width: 100%;
-      max-height: 92vh;
-      border-radius: 12px;
-    }
+    .lightbox img { max-width: 100%; max-height: 92vh; border-radius: 12px; }
 
     .empty {
       text-align: center;
-      padding: 40px 16px;
+      padding: 42px 16px;
       color: var(--muted);
-      font-size: 15px;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
     }
     .msg { font-size: 13px; color: var(--red); min-height: 18px; }
+    .msg.ok { color: var(--green); }
     .toggle-row {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 10px 12px;
+      padding: 12px 14px;
       background: var(--bg);
+      border: 1px solid var(--border);
       border-radius: 12px;
       font-size: 14px;
       font-weight: 500;
+      cursor: pointer;
     }
-    .toggle-row input { width: auto; }
+    .toggle-row input { width: auto; accent-color: var(--red); }
+
+    @media (max-width: 520px) {
+      .profile-name-text { display: none; }
+      .profile-pill { padding: 4px; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- ЭКРАН АВТОРИЗАЦИИ -->
+  <!-- АВТОРИЗАЦИЯ -->
   <div id="authView" class="auth-wrap">
     <div class="auth-card stack">
       <h1>Diary</h1>
@@ -430,7 +530,7 @@
     </div>
   </div>
 
-  <!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
+  <!-- ПРИЛОЖЕНИЕ -->
   <div id="appView" class="hidden">
     <header class="topbar">
       <div class="topbar-inner">
@@ -439,7 +539,10 @@
           <button id="navHw" class="active" onclick="switchPage('hw')">ДЗ</button>
           <button id="navMembers" onclick="switchPage('members')">Участники</button>
         </div>
-        <button class="btn secondary sm" onclick="signOut()">Выйти</button>
+        <button class="profile-pill" onclick="openProfileSettings()" title="Настройки профиля">
+          <span id="headerAvatar" class="avatar">?</span>
+          <span id="headerName" class="profile-name-text">Профиль</span>
+        </button>
       </div>
     </header>
 
@@ -449,7 +552,7 @@
         <div class="days-bar" id="daysBar"></div>
         <div class="section-head">
           <h2 id="dayTitle">Понедельник</h2>
-          <button id="addLessonBtn" class="btn sm hidden" onclick="openEditor(null)">+ Урок</button>
+          <button id="addLessonBtn" class="btn sm hidden" onclick="openEditor(null)">+ Добавить урок</button>
         </div>
         <div id="lessonsList" class="lesson-list"></div>
       </section>
@@ -465,15 +568,32 @@
     </main>
   </div>
 
-  <!-- МОДАЛКА ПРОСМОТРА / РЕДАКТИРОВАНИЯ УРОКА -->
+  <!-- ОБЩЕЕ МОДАЛЬНОЕ ОКНО -->
   <div id="modalBackdrop" class="modal-backdrop hidden" onclick="if(event.target===this) closeModal()">
     <div class="modal" id="modalContent"></div>
   </div>
 
-  <!-- ПОЛНОЭКРАННЫЙ ПРОСМОТР ФОТО -->
+  <!-- ПРОСМОТР ФОТО -->
   <div id="lightbox" class="lightbox hidden" onclick="this.classList.add('hidden')">
     <img id="lightboxImg" src="" alt="Фото ДЗ" />
   </div>
+
+  <!-- ПОДСКАЗКИ ПРЕДМЕТОВ -->
+  <datalist id="subjectSuggestions">
+    <option value="Алгебра"></option>
+    <option value="Геометрия"></option>
+    <option value="Физика"></option>
+    <option value="Химия"></option>
+    <option value="Биология"></option>
+    <option value="Информатика"></option>
+    <option value="Русский язык"></option>
+    <option value="Литература"></option>
+    <option value="Английский язык"></option>
+    <option value="История"></option>
+    <option value="Обществознание"></option>
+    <option value="География"></option>
+    <option value="Физкультура"></option>
+  </datalist>
 
   <script>
     const SUPABASE_URL = 'https://cvjobvwcnuiplvwmvewv.supabase.co';
@@ -492,9 +612,18 @@
     let currentUser = null;
     let currentProfile = null;
     let currentPage = 'hw';
-    let selectedDay = Math.min(Math.max(new Date().getDay(), 1), 6); // Вс -> Пн
+    let selectedDay = Math.min(Math.max(new Date().getDay(), 1), 6);
     let lessonsCache = [];
     let completedSet = new Set();
+
+    // --- ТЕМА (Авто / Светлая / Темная) ---
+    function applyTheme(theme) {
+      const val = theme || 'auto';
+      localStorage.setItem('diary_theme', val);
+      if (val === 'auto') document.documentElement.removeAttribute('data-theme');
+      else document.documentElement.setAttribute('data-theme', val);
+    }
+    applyTheme(localStorage.getItem('diary_theme') || 'auto');
 
     const isAdmin = () => currentProfile && (currentProfile.role === 'admin' || currentProfile.role === 'super_admin');
     const isSuperAdmin = () => currentProfile && currentProfile.role === 'super_admin';
@@ -529,12 +658,10 @@
       const fullName = document.getElementById('nameInput').value.trim();
       const email = document.getElementById('emailInput').value.trim();
       const password = document.getElementById('passInput').value;
-
       if (!fullName) { msg.textContent = 'Введите имя для регистрации'; return; }
 
       const { error } = await db.auth.signUp({
-        email,
-        password,
+        email, password,
         options: { data: { full_name: fullName } }
       });
       if (error) msg.textContent = error.message;
@@ -551,6 +678,7 @@
     }
 
     async function signOut() {
+      closeModal();
       await db.auth.signOut();
     }
 
@@ -558,13 +686,85 @@
       const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
       currentProfile = data || { id: currentUser.id, email: currentUser.email, full_name: currentUser.email, role: 'user' };
       document.getElementById('addLessonBtn').classList.toggle('hidden', !isAdmin());
+
+      const shortName = currentProfile.full_name.split(' ')[0] || 'Профиль';
+      document.getElementById('headerName').textContent = shortName;
+      document.getElementById('headerAvatar').textContent = shortName[0].toUpperCase();
+
       const roleLabels = { super_admin: 'Главный админ', admin: 'Админ', user: 'Ученик' };
       const badge = document.getElementById('myRoleBadge');
       badge.textContent = 'Вы: ' + roleLabels[currentProfile.role];
       badge.className = 'badge ' + (currentProfile.role === 'super_admin' ? 'orange' : currentProfile.role === 'admin' ? 'blue' : 'gray');
     }
 
-    // --- NAVIGATION ---
+    // --- НАСТРОЙКИ ПРОФИЛЯ ---
+    function openProfileSettings() {
+      const currentTheme = localStorage.getItem('diary_theme') || 'auto';
+      const roleLabels = { super_admin: 'Главный админ', admin: 'Админ', user: 'Ученик' };
+
+      document.getElementById('modalContent').innerHTML = `
+        <div class="modal-head">
+          <h3>Настройки профиля</h3>
+          <button class="close-x" onclick="closeModal()">✕</button>
+        </div>
+        <div class="stack">
+          <div class="row" style="justify-content:space-between; padding:12px 14px; background:var(--bg); border-radius:12px;">
+            <div>
+              <div style="font-weight:600;">${esc(currentProfile.email)}</div>
+              <div style="font-size:12px; color:var(--muted);">Роль: ${roleLabels[currentProfile.role]}</div>
+            </div>
+            <span class="badge ${currentProfile.role === 'super_admin' ? 'orange' : currentProfile.role === 'admin' ? 'blue' : 'gray'}">
+              ${roleLabels[currentProfile.role]}
+            </span>
+          </div>
+
+          <div class="field">
+            <label>Имя и фамилия</label>
+            <input id="profNameInput" type="text" value="${esc(currentProfile.full_name)}" placeholder="Ваше имя" />
+          </div>
+
+          <div class="field">
+            <label>Тема оформления</label>
+            <div class="segmented" style="width:100%; display:grid; grid-template-columns:repeat(3,1fr);">
+              <button class="${currentTheme === 'auto' ? 'active' : ''}" onclick="setThemeFromModal('auto')">Авто</button>
+              <button class="${currentTheme === 'light' ? 'active' : ''}" onclick="setThemeFromModal('light')">Светлая</button>
+              <button class="${currentTheme === 'dark' ? 'active' : ''}" onclick="setThemeFromModal('dark')">Тёмная</button>
+            </div>
+          </div>
+
+          <div id="profMsg" class="msg"></div>
+
+          <div class="row" style="justify-content:space-between; margin-top:6px;">
+            <button class="btn danger" onclick="signOut()">Выйти из аккаунта</button>
+            <button class="btn" onclick="saveProfileName()">Сохранить имя</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('modalBackdrop').classList.remove('hidden');
+    }
+
+    function setThemeFromModal(theme) {
+      applyTheme(theme);
+      openProfileSettings();
+    }
+
+    async function saveProfileName() {
+      const msg = document.getElementById('profMsg');
+      msg.className = 'msg';
+      msg.textContent = '';
+      const newName = document.getElementById('profNameInput').value.trim();
+      if (!newName) { msg.textContent = 'Имя не может быть пустым'; return; }
+
+      const { error } = await db.from('profiles').update({ full_name: newName }).eq('id', currentUser.id);
+      if (error) { msg.textContent = error.message; return; }
+
+      await loadMyProfile();
+      if (currentPage === 'members') await loadMembers();
+      msg.className = 'msg ok';
+      msg.textContent = 'Имя сохранено!';
+    }
+
+    // --- НАВИГАЦИЯ ---
     function switchPage(page) {
       currentPage = page;
       document.getElementById('pageHw').classList.toggle('hidden', page !== 'hw');
@@ -576,8 +776,7 @@
     }
 
     function renderDays() {
-      const bar = document.getElementById('daysBar');
-      bar.innerHTML = DAYS.map(d => `
+      document.getElementById('daysBar').innerHTML = DAYS.map(d => `
         <button class="day-btn ${d.id === selectedDay ? 'active' : ''}" onclick="selectDay(${d.id})">${d.short}</button>
       `).join('');
       document.getElementById('dayTitle').textContent = DAYS.find(d => d.id === selectedDay).full;
@@ -589,7 +788,7 @@
       renderLessons();
     }
 
-    // --- HOMEWORK & SCHEDULE ---
+    // --- УРОКИ И ДЗ ---
     async function loadHwData() {
       const [lessonsRes, compRes] = await Promise.all([
         db.from('lessons').select('*').order('lesson_number', { ascending: true }).order('id', { ascending: true }),
@@ -605,16 +804,19 @@
       const dayLessons = lessonsCache.filter(l => l.day_of_week === selectedDay);
 
       if (!dayLessons.length) {
-        list.innerHTML = `<div class="empty">На этот день уроков пока нет</div>`;
+        list.innerHTML = `
+          <div class="empty">
+            <div>На этот день уроков пока нет</div>
+            ${isAdmin() ? `<button class="btn sm" onclick="openEditor(null)">+ Добавить первый урок</button>` : ''}
+          </div>
+        `;
         return;
       }
 
       list.innerHTML = dayLessons.map(l => {
         const done = completedSet.has(l.id);
         const photosCount = (l.photo_urls || []).length;
-        const preview = l.is_cancelled
-          ? 'Занятие отменено'
-          : (l.homework ? l.homework : 'ДЗ не задано');
+        const preview = l.is_cancelled ? 'Занятие отменено' : (l.homework || 'ДЗ не задано');
 
         return `
           <div class="lesson-card ${l.is_cancelled ? 'cancelled' : ''} ${done ? 'done' : ''}" onclick="openLessonView(${l.id})">
@@ -647,7 +849,6 @@
       }
     }
 
-    // --- LESSON VIEW MODAL ---
     function openLessonView(lessonId) {
       const l = lessonsCache.find(x => x.id === lessonId);
       if (!l) return;
@@ -668,7 +869,6 @@
         </div>
 
         <div class="hw-box">${l.homework ? esc(l.homework) : '<span style="color:var(--muted)">Домашнее задание не указано</span>'}</div>
-
         ${photos ? `<div class="photo-grid">${photos}</div>` : ''}
 
         <div class="row" style="justify-content: space-between; margin-top: 8px;">
@@ -681,13 +881,16 @@
       document.getElementById('modalBackdrop').classList.remove('hidden');
     }
 
-    // --- LESSON EDITOR MODAL (ADMIN) ---
+    // --- УДОБНЫЙ РЕДАКТОР УРОКОВ (АДМИНЫ) ---
     let editingPhotos = [];
+    let pendingFiles = [];
 
     function openEditor(lessonId) {
       const l = lessonId ? lessonsCache.find(x => x.id === lessonId) : null;
       editingPhotos = l ? [...(l.photo_urls || [])] : [];
-      const nextNum = lessonsCache.filter(x => x.day_of_week === selectedDay).length + 1;
+      pendingFiles = [];
+      const dayVal = l ? l.day_of_week : selectedDay;
+      const nextNum = lessonsCache.filter(x => x.day_of_week === dayVal).length + 1;
 
       document.getElementById('modalContent').innerHTML = `
         <div class="modal-head">
@@ -696,20 +899,41 @@
         </div>
         <div class="stack">
           <div class="row">
-            <input id="edNum" type="number" min="1" max="12" style="width:90px" value="${l ? l.lesson_number : nextNum}" placeholder="№" />
-            <input id="edSubj" type="text" value="${l ? esc(l.subject) : ''}" placeholder="Название предмета (напр. Физика)" />
+            <div class="field" style="flex:1;">
+              <label>День недели</label>
+              <select id="edDay">
+                ${DAYS.map(d => `<option value="${d.id}" ${d.id === dayVal ? 'selected' : ''}>${d.full}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field" style="width:105px;">
+              <label>№ урока</label>
+              <input id="edNum" type="number" min="1" max="12" value="${l ? l.lesson_number : nextNum}" />
+            </div>
           </div>
-          <textarea id="edHw" placeholder="Домашнее задание...">${l ? esc(l.homework) : ''}</textarea>
+
+          <div class="field">
+            <label>Предмет</label>
+            <input id="edSubj" list="subjectSuggestions" type="text" value="${l ? esc(l.subject) : ''}" placeholder="Выберите или введите предмет..." />
+          </div>
+
+          <div class="field">
+            <label>Домашнее задание</label>
+            <textarea id="edHw" placeholder="Например: §14, упр. 125–128">${l ? esc(l.homework) : ''}</textarea>
+          </div>
 
           <label class="toggle-row">
             <input id="edCancel" type="checkbox" ${l?.is_cancelled ? 'checked' : ''} />
-            <span>Урока не будет (отменен)</span>
+            <span>Урока не будет (отменить занятие)</span>
           </label>
 
-          <div>
-            <div style="font-size:13px; color:var(--muted); margin-bottom:6px;">Фотографии ДЗ:</div>
+          <div class="field">
+            <label>Фотографии к ДЗ</label>
             <div id="edPhotoGrid" class="photo-grid"></div>
-            <input id="edPhotoFile" type="file" accept="image/*" multiple />
+            <label class="upload-zone">
+              <strong>+ Выбрать фотографии</strong>
+              <span style="font-size:12px;">Можно выбрать сразу несколько</span>
+              <input id="edPhotoFile" type="file" accept="image/*" multiple class="hidden" onchange="handleNewPhotos(this.files)" />
+            </label>
           </div>
 
           <div id="edMsg" class="msg"></div>
@@ -727,20 +951,29 @@
       document.getElementById('modalBackdrop').classList.remove('hidden');
     }
 
+    function handleNewPhotos(fileList) {
+      for (const file of fileList) {
+        pendingFiles.push({ file, preview: URL.createObjectURL(file) });
+      }
+      renderEditingPhotos();
+    }
+
     function renderEditingPhotos() {
       const grid = document.getElementById('edPhotoGrid');
       if (!grid) return;
-      grid.innerHTML = editingPhotos.map((url, idx) => `
+      const savedHtml = editingPhotos.map((url, idx) => `
         <div class="photo-item">
           <img src="${esc(url)}" onclick="openLightbox('${esc(url)}')" />
-          <button class="photo-del" onclick="removeEditingPhoto(${idx})">✕</button>
+          <button class="photo-del" onclick="editingPhotos.splice(${idx},1); renderEditingPhotos();">✕</button>
         </div>
       `).join('');
-    }
-
-    function removeEditingPhoto(idx) {
-      editingPhotos.splice(idx, 1);
-      renderEditingPhotos();
+      const pendingHtml = pendingFiles.map((item, idx) => `
+        <div class="photo-item">
+          <img src="${item.preview}" onclick="openLightbox('${item.preview}')" />
+          <button class="photo-del" onclick="pendingFiles.splice(${idx},1); renderEditingPhotos();">✕</button>
+        </div>
+      `).join('');
+      grid.innerHTML = savedHtml + pendingHtml;
     }
 
     async function saveLesson(lessonId) {
@@ -748,22 +981,21 @@
       const msg = document.getElementById('edMsg');
       msg.textContent = '';
 
+      const day_of_week = parseInt(document.getElementById('edDay').value, 10);
       const lesson_number = parseInt(document.getElementById('edNum').value, 10) || 1;
       const subject = document.getElementById('edSubj').value.trim();
       const homework = document.getElementById('edHw').value.trim();
       const is_cancelled = document.getElementById('edCancel').checked;
-      const files = document.getElementById('edPhotoFile').files;
 
       if (!subject) { msg.textContent = 'Введите название предмета'; return; }
 
       btn.disabled = true;
       btn.textContent = 'Сохранение...';
 
-      // Загружаем новые фото в Supabase Storage
-      for (const file of files) {
-        const ext = file.name.split('.').pop() || 'jpg';
+      for (const item of pendingFiles) {
+        const ext = item.file.name.split('.').pop() || 'jpg';
         const path = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-        const { error: upErr } = await db.storage.from('diary-photos').upload(path, file);
+        const { error: upErr } = await db.storage.from('diary-photos').upload(path, item.file);
         if (upErr) {
           msg.textContent = 'Ошибка загрузки фото: ' + upErr.message;
           btn.disabled = false;
@@ -774,15 +1006,7 @@
         editingPhotos.push(pub.publicUrl);
       }
 
-      const payload = {
-        day_of_week: selectedDay,
-        lesson_number,
-        subject,
-        homework,
-        is_cancelled,
-        photo_urls: editingPhotos
-      };
-
+      const payload = { day_of_week, lesson_number, subject, homework, is_cancelled, photo_urls: editingPhotos };
       const { error } = lessonId
         ? await db.from('lessons').update(payload).eq('id', lessonId)
         : await db.from('lessons').insert([payload]);
@@ -794,7 +1018,9 @@
         return;
       }
 
+      selectedDay = day_of_week;
       closeModal();
+      renderDays();
       await loadHwData();
     }
 
@@ -814,7 +1040,7 @@
       document.getElementById('lightbox').classList.remove('hidden');
     }
 
-    // --- MEMBERS PAGE ---
+    // --- УЧАСТНИКИ ---
     async function loadMembers() {
       const { data, error } = await db.from('profiles').select('*').order('created_at', { ascending: true });
       const list = document.getElementById('membersList');
