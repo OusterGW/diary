@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diary — Дневник класса</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #f2f2f7;
+      --surface: rgba(255, 255, 255, 0.86);
+      --surface-solid: #ffffff;
+      --text: #1c1c1e;
+      --muted: #8e8e93;
+      --border: rgba(60, 60, 67, 0.12);
+      --accent: #007aff;
+      --accent-hover: #0062cc;
+      --green: #34c759;
+      --red: #ff3b30;
+      --orange: #ff9500;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    .hidden { display: none !important; }
+
+    /* Auth */
+    .auth-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 390px;
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 28px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+    }
+    .auth-card h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.4px; }
+    .auth-card p { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
+
+    /* Header & Nav */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(242, 242, 247, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+    .segmented {
+      display: inline-flex;
+      background: rgba(118, 118, 128, 0.14);
+      padding: 3px;
+      border-radius: 12px;
+      gap: 2px;
+    }
+    .segmented button {
+      background: transparent;
+      color: var(--text);
+      border: none;
+      padding: 7px 16px;
+      border-radius: 9px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+    .segmented button.active {
+      background: var(--surface-solid);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 18px 16px 60px;
+    }
+
+    /* Days Tabs */
+    .days-bar {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      background: rgba(118, 118, 128, 0.12);
+      padding: 4px;
+      border-radius: 14px;
+      margin-bottom: 18px;
+    }
+    .day-btn {
+      border: none;
+      background: transparent;
+      padding: 9px 4px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .day-btn.active {
+      background: var(--surface-solid);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Section Header */
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .section-head h2 { margin: 0; font-size: 20px; letter-spacing: -0.3px; }
+
+    /* Inputs & Buttons */
+    input, textarea, select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-solid);
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 90px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      transition: 0.15s;
+    }
+    .btn:hover { background: var(--accent-hover); }
+    .btn.secondary { background: rgba(118, 118, 128, 0.14); color: var(--text); }
+    .btn.secondary:hover { background: rgba(118, 118, 128, 0.22); }
+    .btn.danger { background: rgba(255, 59, 48, 0.12); color: var(--red); }
+    .btn.danger:hover { background: rgba(255, 59, 48, 0.2); }
+    .btn.sm { padding: 6px 12px; font-size: 13px; border-radius: 10px; }
+
+    .stack { display: flex; flex-direction: column; gap: 10px; }
+    .row { display: flex; gap: 8px; align-items: center; }
+
+    /* Lesson Cards */
+    .lesson-list { display: flex; flex-direction: column; gap: 10px; }
+    .lesson-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.15s ease;
+    }
+    .lesson-card:hover {
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+      transform: translateY(-1px);
+    }
+    .lesson-card.cancelled {
+      background: rgba(255, 59, 48, 0.05);
+      border-color: rgba(255, 59, 48, 0.22);
+    }
+    .lesson-card.done .lesson-title {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    /* Custom Checkbox */
+    .check-btn {
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      border-radius: 50%;
+      border: 2px solid #c7c7cc;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      color: #fff;
+      font-size: 13px;
+      transition: 0.15s;
+    }
+    .check-btn.checked {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .lesson-num {
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      border-radius: 9px;
+      background: rgba(0, 122, 255, 0.1);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lesson-card.cancelled .lesson-num {
+      background: rgba(255, 59, 48, 0.12);
+      color: var(--red);
+    }
+    .lesson-info { flex: 1; min-width: 0; }
+    .lesson-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .lesson-preview {
+      margin-top: 3px;
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge.red { background: rgba(255, 59, 48, 0.14); color: var(--red); }
+    .badge.blue { background: rgba(0, 122, 255, 0.14); color: var(--accent); }
+    .badge.orange { background: rgba(255, 149, 0, 0.16); color: #c77400; }
+    .badge.gray { background: rgba(142, 142, 147, 0.16); color: #636366; }
+
+    /* Members */
+    .member-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+    .member-name { font-weight: 600; font-size: 15px; }
+    .member-email { font-size: 13px; color: var(--muted); }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal {
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: var(--surface-solid);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+    }
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .modal-head h3 { margin: 0; font-size: 20px; }
+    .close-x {
+      background: rgba(118, 118, 128, 0.14);
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text);
+    }
+    .hw-box {
+      background: var(--bg);
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 15px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      margin-bottom: 14px;
+    }
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .photo-item {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 1;
+      background: #e5e5ea;
+    }
+    .photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      cursor: zoom-in;
+      display: block;
+    }
+    .photo-del {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0, 0, 0, 0.65);
+      color: #fff;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    /* Lightbox */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      cursor: zoom-out;
+    }
+    .lightbox img {
+      max-width: 100%;
+      max-height: 92vh;
+      border-radius: 12px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px 16px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .msg { font-size: 13px; color: var(--red); min-height: 18px; }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg);
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .toggle-row input { width: auto; }
+  </style>
+</head>
+<body>
+
+  <!-- ЭКРАН АВТОРИЗАЦИИ -->
+  <div id="authView" class="auth-wrap">
+    <div class="auth-card stack">
+      <h1>Diary</h1>
+      <p>Школьное расписание, ДЗ и фото</p>
+      <input id="nameInput" type="text" placeholder="Имя и фамилия (для регистрации)" />
+      <input id="emailInput" type="email" placeholder="Email" />
+      <input id="passInput" type="password" placeholder="Пароль (от 6 символов)" />
+      <div class="row">
+        <button class="btn" style="flex:1" onclick="signIn()">Войти</button>
+        <button class="btn secondary" style="flex:1" onclick="signUp()">Регистрация</button>
+      </div>
+      <div id="authMsg" class="msg"></div>
+    </div>
+  </div>
+
+  <!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
+  <div id="appView" class="hidden">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">Diary</div>
+        <div class="segmented">
+          <button id="navHw" class="active" onclick="switchPage('hw')">ДЗ</button>
+          <button id="navMembers" onclick="switchPage('members')">Участники</button>
+        </div>
+        <button class="btn secondary sm" onclick="signOut()">Выйти</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- СТРАНИЦА ДЗ -->
+      <section id="pageHw">
+        <div class="days-bar" id="daysBar"></div>
+        <div class="section-head">
+          <h2 id="dayTitle">Понедельник</h2>
+          <button id="addLessonBtn" class="btn sm hidden" onclick="openEditor(null)">+ Урок</button>
+        </div>
+        <div id="lessonsList" class="lesson-list"></div>
+      </section>
+
+      <!-- СТРАНИЦА УЧАСТНИКИ -->
+      <section id="pageMembers" class="hidden">
+        <div class="section-head">
+          <h2>Участники</h2>
+          <span id="myRoleBadge" class="badge gray"></span>
+        </div>
+        <div id="membersList" class="stack"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- МОДАЛКА ПРОСМОТРА / РЕДАКТИРОВАНИЯ УРОКА -->
+  <div id="modalBackdrop" class="modal-backdrop hidden" onclick="if(event.target===this) closeModal()">
+    <div class="modal" id="modalContent"></div>
+  </div>
+
+  <!-- ПОЛНОЭКРАННЫЙ ПРОСМОТР ФОТО -->
+  <div id="lightbox" class="lightbox hidden" onclick="this.classList.add('hidden')">
+    <img id="lightboxImg" src="" alt="Фото ДЗ" />
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://cvjobvwcnuiplvwmvewv.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_IUujdNZtYjJNoGhrtgabHQ_70qDfFys';
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const DAYS = [
+      { id: 1, short: 'Пн', full: 'Понедельник' },
+      { id: 2, short: 'Вт', full: 'Вторник' },
+      { id: 3, short: 'Ср', full: 'Среда' },
+      { id: 4, short: 'Чт', full: 'Четверг' },
+      { id: 5, short: 'Пт', full: 'Пятница' },
+      { id: 6, short: 'Сб', full: 'Суббота' }
+    ];
+
+    let currentUser = null;
+    let currentProfile = null;
+    let currentPage = 'hw';
+    let selectedDay = Math.min(Math.max(new Date().getDay(), 1), 6); // Вс -> Пн
+    let lessonsCache = [];
+    let completedSet = new Set();
+
+    const isAdmin = () => currentProfile && (currentProfile.role === 'admin' || currentProfile.role === 'super_admin');
+    const isSuperAdmin = () => currentProfile && currentProfile.role === 'super_admin';
+
+    function esc(str = '') {
+      return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    // --- AUTH ---
+    db.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        currentUser = session.user;
+        await loadMyProfile();
+        document.getElementById('authView').classList.add('hidden');
+        document.getElementById('appView').classList.remove('hidden');
+        renderDays();
+        await loadHwData();
+        if (currentPage === 'members') await loadMembers();
+      } else {
+        currentUser = null;
+        currentProfile = null;
+        document.getElementById('appView').classList.add('hidden');
+        document.getElementById('authView').classList.remove('hidden');
+      }
+    });
+
+    async function signUp() {
+      const msg = document.getElementById('authMsg');
+      msg.textContent = '';
+      const fullName = document.getElementById('nameInput').value.trim();
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passInput').value;
+
+      if (!fullName) { msg.textContent = 'Введите имя для регистрации'; return; }
+
+      const { error } = await db.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullName } }
+      });
+      if (error) msg.textContent = error.message;
+      else msg.textContent = 'Аккаунт создан! Если включено подтверждение почты — проверьте email.';
+    }
+
+    async function signIn() {
+      const msg = document.getElementById('authMsg');
+      msg.textContent = '';
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passInput').value;
+      const { error } = await db.auth.signInWithPassword({ email, password });
+      if (error) msg.textContent = error.message;
+    }
+
+    async function signOut() {
+      await db.auth.signOut();
+    }
+
+    async function loadMyProfile() {
+      const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
+      currentProfile = data || { id: currentUser.id, email: currentUser.email, full_name: currentUser.email, role: 'user' };
+      document.getElementById('addLessonBtn').classList.toggle('hidden', !isAdmin());
+      const roleLabels = { super_admin: 'Главный админ', admin: 'Админ', user: 'Ученик' };
+      const badge = document.getElementById('myRoleBadge');
+      badge.textContent = 'Вы: ' + roleLabels[currentProfile.role];
+      badge.className = 'badge ' + (currentProfile.role === 'super_admin' ? 'orange' : currentProfile.role === 'admin' ? 'blue' : 'gray');
+    }
+
+    // --- NAVIGATION ---
+    function switchPage(page) {
+      currentPage = page;
+      document.getElementById('pageHw').classList.toggle('hidden', page !== 'hw');
+      document.getElementById('pageMembers').classList.toggle('hidden', page !== 'members');
+      document.getElementById('navHw').classList.toggle('active', page === 'hw');
+      document.getElementById('navMembers').classList.toggle('active', page === 'members');
+      if (page === 'hw') loadHwData();
+      else loadMembers();
+    }
+
+    function renderDays() {
+      const bar = document.getElementById('daysBar');
+      bar.innerHTML = DAYS.map(d => `
+        <button class="day-btn ${d.id === selectedDay ? 'active' : ''}" onclick="selectDay(${d.id})">${d.short}</button>
+      `).join('');
+      document.getElementById('dayTitle').textContent = DAYS.find(d => d.id === selectedDay).full;
+    }
+
+    function selectDay(dayId) {
+      selectedDay = dayId;
+      renderDays();
+      renderLessons();
+    }
+
+    // --- HOMEWORK & SCHEDULE ---
+    async function loadHwData() {
+      const [lessonsRes, compRes] = await Promise.all([
+        db.from('lessons').select('*').order('lesson_number', { ascending: true }).order('id', { ascending: true }),
+        db.from('user_completions').select('lesson_id').eq('user_id', currentUser.id).eq('completed', true)
+      ]);
+      lessonsCache = lessonsRes.data || [];
+      completedSet = new Set((compRes.data || []).map(r => r.lesson_id));
+      renderLessons();
+    }
+
+    function renderLessons() {
+      const list = document.getElementById('lessonsList');
+      const dayLessons = lessonsCache.filter(l => l.day_of_week === selectedDay);
+
+      if (!dayLessons.length) {
+        list.innerHTML = `<div class="empty">На этот день уроков пока нет</div>`;
+        return;
+      }
+
+      list.innerHTML = dayLessons.map(l => {
+        const done = completedSet.has(l.id);
+        const photosCount = (l.photo_urls || []).length;
+        const preview = l.is_cancelled
+          ? 'Занятие отменено'
+          : (l.homework ? l.homework : 'ДЗ не задано');
+
+        return `
+          <div class="lesson-card ${l.is_cancelled ? 'cancelled' : ''} ${done ? 'done' : ''}" onclick="openLessonView(${l.id})">
+            <button class="check-btn ${done ? 'checked' : ''}" title="Отметить выполненным у себя"
+              onclick="event.stopPropagation(); toggleDone(${l.id})">${done ? '✓' : ''}</button>
+            <div class="lesson-num">${l.lesson_number}</div>
+            <div class="lesson-info">
+              <div class="lesson-title">
+                <span>${esc(l.subject)}</span>
+                ${l.is_cancelled ? '<span class="badge red">Урока не будет</span>' : ''}
+                ${photosCount ? `<span class="badge blue">📷 ${photosCount}</span>` : ''}
+              </div>
+              <div class="lesson-preview">${esc(preview)}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function toggleDone(lessonId) {
+      const wasDone = completedSet.has(lessonId);
+      if (wasDone) {
+        completedSet.delete(lessonId);
+        renderLessons();
+        await db.from('user_completions').delete().eq('user_id', currentUser.id).eq('lesson_id', lessonId);
+      } else {
+        completedSet.add(lessonId);
+        renderLessons();
+        await db.from('user_completions').upsert({ user_id: currentUser.id, lesson_id: lessonId, completed: true });
+      }
+    }
+
+    // --- LESSON VIEW MODAL ---
+    function openLessonView(lessonId) {
+      const l = lessonsCache.find(x => x.id === lessonId);
+      if (!l) return;
+
+      const photos = (l.photo_urls || []).map(url => `
+        <div class="photo-item">
+          <img src="${esc(url)}" onclick="openLightbox('${esc(url)}')" alt="Фото ДЗ" />
+        </div>
+      `).join('');
+
+      document.getElementById('modalContent').innerHTML = `
+        <div class="modal-head">
+          <div>
+            <h3>${l.lesson_number}. ${esc(l.subject)}</h3>
+            ${l.is_cancelled ? '<span class="badge red" style="margin-top:6px;">Урока не будет</span>' : ''}
+          </div>
+          <button class="close-x" onclick="closeModal()">✕</button>
+        </div>
+
+        <div class="hw-box">${l.homework ? esc(l.homework) : '<span style="color:var(--muted)">Домашнее задание не указано</span>'}</div>
+
+        ${photos ? `<div class="photo-grid">${photos}</div>` : ''}
+
+        <div class="row" style="justify-content: space-between; margin-top: 8px;">
+          <button class="btn secondary" onclick="toggleDone(${l.id}); openLessonView(${l.id});">
+            ${completedSet.has(l.id) ? '✓ Сделано (снять)' : 'Отметить сделанным'}
+          </button>
+          ${isAdmin() ? `<button class="btn" onclick="openEditor(${l.id})">Редактировать</button>` : ''}
+        </div>
+      `;
+      document.getElementById('modalBackdrop').classList.remove('hidden');
+    }
+
+    // --- LESSON EDITOR MODAL (ADMIN) ---
+    let editingPhotos = [];
+
+    function openEditor(lessonId) {
+      const l = lessonId ? lessonsCache.find(x => x.id === lessonId) : null;
+      editingPhotos = l ? [...(l.photo_urls || [])] : [];
+      const nextNum = lessonsCache.filter(x => x.day_of_week === selectedDay).length + 1;
+
+      document.getElementById('modalContent').innerHTML = `
+        <div class="modal-head">
+          <h3>${l ? 'Редактировать урок' : 'Новый урок'}</h3>
+          <button class="close-x" onclick="closeModal()">✕</button>
+        </div>
+        <div class="stack">
+          <div class="row">
+            <input id="edNum" type="number" min="1" max="12" style="width:90px" value="${l ? l.lesson_number : nextNum}" placeholder="№" />
+            <input id="edSubj" type="text" value="${l ? esc(l.subject) : ''}" placeholder="Название предмета (напр. Физика)" />
+          </div>
+          <textarea id="edHw" placeholder="Домашнее задание...">${l ? esc(l.homework) : ''}</textarea>
+
+          <label class="toggle-row">
+            <input id="edCancel" type="checkbox" ${l?.is_cancelled ? 'checked' : ''} />
+            <span>Урока не будет (отменен)</span>
+          </label>
+
+          <div>
+            <div style="font-size:13px; color:var(--muted); margin-bottom:6px;">Фотографии ДЗ:</div>
+            <div id="edPhotoGrid" class="photo-grid"></div>
+            <input id="edPhotoFile" type="file" accept="image/*" multiple />
+          </div>
+
+          <div id="edMsg" class="msg"></div>
+
+          <div class="row" style="justify-content: space-between; margin-top:6px;">
+            ${l ? `<button class="btn danger" onclick="deleteLesson(${l.id})">Удалить</button>` : '<span></span>'}
+            <div class="row">
+              <button class="btn secondary" onclick="closeModal()">Отмена</button>
+              <button id="saveLessonBtn" class="btn" onclick="saveLesson(${l ? l.id : 'null'})">Сохранить</button>
+            </div>
+          </div>
+        </div>
+      `;
+      renderEditingPhotos();
+      document.getElementById('modalBackdrop').classList.remove('hidden');
+    }
+
+    function renderEditingPhotos() {
+      const grid = document.getElementById('edPhotoGrid');
+      if (!grid) return;
+      grid.innerHTML = editingPhotos.map((url, idx) => `
+        <div class="photo-item">
+          <img src="${esc(url)}" onclick="openLightbox('${esc(url)}')" />
+          <button class="photo-del" onclick="removeEditingPhoto(${idx})">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function removeEditingPhoto(idx) {
+      editingPhotos.splice(idx, 1);
+      renderEditingPhotos();
+    }
+
+    async function saveLesson(lessonId) {
+      const btn = document.getElementById('saveLessonBtn');
+      const msg = document.getElementById('edMsg');
+      msg.textContent = '';
+
+      const lesson_number = parseInt(document.getElementById('edNum').value, 10) || 1;
+      const subject = document.getElementById('edSubj').value.trim();
+      const homework = document.getElementById('edHw').value.trim();
+      const is_cancelled = document.getElementById('edCancel').checked;
+      const files = document.getElementById('edPhotoFile').files;
+
+      if (!subject) { msg.textContent = 'Введите название предмета'; return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Сохранение...';
+
+      // Загружаем новые фото в Supabase Storage
+      for (const file of files) {
+        const ext = file.name.split('.').pop() || 'jpg';
+        const path = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error: upErr } = await db.storage.from('diary-photos').upload(path, file);
+        if (upErr) {
+          msg.textContent = 'Ошибка загрузки фото: ' + upErr.message;
+          btn.disabled = false;
+          btn.textContent = 'Сохранить';
+          return;
+        }
+        const { data: pub } = db.storage.from('diary-photos').getPublicUrl(path);
+        editingPhotos.push(pub.publicUrl);
+      }
+
+      const payload = {
+        day_of_week: selectedDay,
+        lesson_number,
+        subject,
+        homework,
+        is_cancelled,
+        photo_urls: editingPhotos
+      };
+
+      const { error } = lessonId
+        ? await db.from('lessons').update(payload).eq('id', lessonId)
+        : await db.from('lessons').insert([payload]);
+
+      if (error) {
+        msg.textContent = error.message;
+        btn.disabled = false;
+        btn.textContent = 'Сохранить';
+        return;
+      }
+
+      closeModal();
+      await loadHwData();
+    }
+
+    async function deleteLesson(lessonId) {
+      if (!confirm('Удалить этот урок из расписания?')) return;
+      await db.from('lessons').delete().eq('id', lessonId);
+      closeModal();
+      await loadHwData();
+    }
+
+    function closeModal() {
+      document.getElementById('modalBackdrop').classList.add('hidden');
+    }
+
+    function openLightbox(url) {
+      document.getElementById('lightboxImg').src = url;
+      document.getElementById('lightbox').classList.remove('hidden');
+    }
+
+    // --- MEMBERS PAGE ---
+    async function loadMembers() {
+      const { data, error } = await db.from('profiles').select('*').order('created_at', { ascending: true });
+      const list = document.getElementById('membersList');
+      if (error) { list.innerHTML = `<div class="empty">${esc(error.message)}</div>`; return; }
+
+      const order = { super_admin: 0, admin: 1, user: 2 };
+      data.sort((a, b) => order[a.role] - order[b.role]);
+
+      const labels = {
+        super_admin: '<span class="badge orange">Главный админ</span>',
+        admin: '<span class="badge blue">Админ</span>',
+        user: '<span class="badge gray">Ученик</span>'
+      };
+
+      list.innerHTML = data.map(u => {
+        const canManage = isSuperAdmin() && u.role !== 'super_admin' && u.id !== currentUser.id;
+        return `
+          <div class="member-card">
+            <div>
+              <div class="member-name">${esc(u.full_name)} ${labels[u.role]}</div>
+              <div class="member-email">${esc(u.email)}</div>
+            </div>
+            ${canManage ? `
+              <button class="btn sm ${u.role === 'admin' ? 'danger' : 'secondary'}"
+                onclick="toggleAdminRole('${u.id}', '${u.role === 'admin' ? 'user' : 'admin'}')">
+                ${u.role === 'admin' ? 'Снять админа' : 'Сделать админом'}
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function toggleAdminRole(userId, newRole) {
+      const { error } = await db.from('profiles').update({ role: newRole }).eq('id', userId);
+      if (error) alert('Ошибка: ' + error.message);
+      else await loadMembers();
+    }
+  </script>
+</body>
+</html>
