@@ -14,8 +14,8 @@
     :root {
       --bg: #f2f2f7;
       --surface-solid: #ffffff;
-      --topbar: rgba(242, 242, 247, 0.84);
-      --dock-bg: rgba(255, 255, 255, 0.86);
+      --topbar: rgba(242, 242, 247, 0.92);
+      --dock-bg: rgba(255, 255, 255, 0.88);
       --input-bg: #ffffff;
       --subtle-bg: rgba(118, 118, 128, 0.12);
       --seg-active: #ffffff;
@@ -34,6 +34,7 @@
       --drag-shadow: 0 16px 38px rgba(0, 0, 0, 0.18);
       --radius: 18px;
       --app-width: 520px;
+      --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
     }
@@ -42,8 +43,8 @@
       :root:not([data-theme="light"]) {
         --bg: #000000;
         --surface-solid: #1c1c1e;
-        --topbar: rgba(18, 18, 20, 0.84);
-        --dock-bg: rgba(34, 34, 38, 0.88);
+        --topbar: rgba(0, 0, 0, 0.9);
+        --dock-bg: rgba(34, 34, 38, 0.9);
         --input-bg: #2c2c2e;
         --subtle-bg: rgba(118, 118, 128, 0.24);
         --seg-active: #3a3a3c;
@@ -66,8 +67,8 @@
     :root[data-theme="dark"] {
       --bg: #000000;
       --surface-solid: #1c1c1e;
-      --topbar: rgba(18, 18, 20, 0.84);
-      --dock-bg: rgba(34, 34, 38, 0.88);
+      --topbar: rgba(0, 0, 0, 0.9);
+      --dock-bg: rgba(34, 34, 38, 0.9);
       --input-bg: #2c2c2e;
       --subtle-bg: rgba(118, 118, 128, 0.24);
       --seg-active: #3a3a3c;
@@ -121,7 +122,7 @@
       gap: 14px;
       padding: 24px;
       text-align: center;
-      transition: opacity 0.28s ease, visibility 0.28s ease;
+      transition: opacity 0.26s ease, visibility 0.26s ease;
     }
     .splash-screen.fade-out {
       opacity: 0;
@@ -133,7 +134,7 @@
       height: 78px;
       border-radius: 20px;
       object-fit: cover;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
       animation: splashPulse 1.8s ease-in-out infinite;
     }
     .splash-title {
@@ -169,13 +170,13 @@
       50% { transform: scale(1.04); }
     }
 
-    /* Уведомление Toast */
+    /* Toast */
     .toast {
       position: fixed;
-      top: 16px;
+      top: calc(14px + var(--safe-top));
       left: 50%;
       z-index: 95;
-      transform: translate3d(-50%, -20px, 0);
+      transform: translate3d(-50%, -24px, 0);
       opacity: 0;
       pointer-events: none;
       background: var(--surface-solid);
@@ -219,7 +220,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: calc(20px + var(--safe-top)) 20px calc(20px + var(--safe-bottom));
     }
     .auth-card {
       width: 100%;
@@ -262,14 +263,15 @@
     .auth-notice svg { color: var(--accent); margin-top: 2px; }
     .auth-notice strong { display: block; margin-bottom: 2px; font-size: 14px; }
 
-    /* Верхняя панель */
+    /* Верхняя панель с safe-area под чёлку и центрированным заголовком */
     .topbar {
       position: sticky;
       top: 0;
       z-index: 20;
+      padding-top: var(--safe-top);
       background: var(--topbar);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
       border-bottom: 1px solid var(--border);
     }
     .topbar-inner {
@@ -279,11 +281,12 @@
       padding: 11px 16px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
     }
     .brand {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 9px;
       font-size: 21px;
       font-weight: 800;
@@ -297,7 +300,7 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
     }
 
-    /* Нижняя плавающая панель */
+    /* Плавающая нижняя панель (3 вкладки: ДЗ / Участники / Профиль) */
     .bottom-nav-wrap {
       position: fixed;
       left: 0;
@@ -313,9 +316,9 @@
       pointer-events: auto;
       position: relative;
       width: 100%;
-      max-width: 310px;
+      max-width: 370px;
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       padding: 5px;
       border-radius: 24px;
       background: var(--dock-bg);
@@ -328,7 +331,7 @@
       position: absolute;
       top: 5px;
       left: 5px;
-      width: calc((100% - 10px) / 2);
+      width: calc((100% - 10px) / 3);
       height: calc(100% - 10px);
       border-radius: 19px;
       background: var(--subtle-bg);
@@ -363,26 +366,10 @@
       width: 100%;
       max-width: var(--app-width);
       margin: 0 auto;
-      padding: 16px 16px calc(96px + var(--safe-bottom));
+      padding: 16px 16px calc(98px + var(--safe-bottom));
       flex: 1;
     }
 
-    /* Профиль в шапке */
-    .profile-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      background: var(--subtle-bg);
-      border: none;
-      color: var(--text);
-      padding: 3px 12px 3px 3px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.16s var(--ease-ios);
-    }
-    .profile-pill:active { transform: scale(0.95); }
     .avatar {
       width: 28px;
       height: 28px;
@@ -496,7 +483,7 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
     .section-head h2 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
 
@@ -777,6 +764,47 @@
       border-radius: 10px;
     }
 
+    /* Страница Профиля (вкладка внизу) */
+    .profile-card {
+      background: var(--surface-solid);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: var(--card-shadow);
+    }
+    .avatar-upload-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .avatar-large {
+      width: 68px;
+      height: 68px;
+      border-radius: 18px;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 700;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .avatar-large img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-email-row {
+      padding: 11px 13px;
+      border-radius: 12px;
+      background: var(--bg);
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      word-break: break-all;
+    }
+    .profile-email-row strong { color: var(--text); font-weight: 600; }
+
     /* Модальное окно */
     .modal-backdrop {
       position: fixed;
@@ -907,43 +935,6 @@
     }
     .toggle-row input { width: auto; accent-color: var(--red); }
 
-    .avatar-upload-wrap {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      background: var(--bg);
-      padding: 12px;
-      border-radius: 14px;
-    }
-    .avatar-large {
-      width: 58px;
-      height: 58px;
-      border-radius: 16px;
-      background: var(--accent);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      font-weight: 700;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-    .avatar-large img { width: 100%; height: 100%; object-fit: cover; }
-    .profile-email-row {
-      padding: 10px 13px;
-      border-radius: 12px;
-      background: var(--bg);
-      font-size: 13px;
-      color: var(--muted);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      word-break: break-all;
-    }
-    .profile-email-row strong { color: var(--text); font-weight: 600; }
-
     /* Лайтбокс */
     .lightbox {
       position: fixed;
@@ -1036,10 +1027,6 @@
           <img src="icon.png" class="brand-icon" alt="" onerror="this.style.display='none'" />
           <span>Diary</span>
         </div>
-        <button class="profile-pill" onclick="openProfileSettings()">
-          <span id="headerAvatar" class="avatar">?</span>
-          <span id="headerName">...</span>
-        </button>
       </div>
     </header>
 
@@ -1057,7 +1044,6 @@
           </button>
         </div>
 
-        <!-- Кнопки основного расписания для админов -->
         <div id="adminScheduleBar" class="admin-bar hidden">
           <button id="setBaseBtn" class="btn secondary" onclick="saveCurrentDayAsBase()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -1080,9 +1066,18 @@
         </div>
         <div id="membersList" class="members-grid"></div>
       </section>
+
+      <!-- СТРАНИЦА ПРОФИЛЬ -->
+      <section id="pageProfile" class="hidden">
+        <div class="section-head">
+          <h2>Профиль</h2>
+          <span id="profRoleBadge" class="badge gray"></span>
+        </div>
+        <div id="profileContent"></div>
+      </section>
     </main>
 
-    <!-- ПЛАВАЮЩАЯ НИЖНЯЯ НАВИГАЦИЯ -->
+    <!-- ПЛАВАЮЩАЯ НИЖНЯЯ НАВИГАЦИЯ (3 ВКЛАДКИ) -->
     <div class="bottom-nav-wrap">
       <nav class="bottom-nav">
         <div class="nav-slider" id="navSlider"></div>
@@ -1105,11 +1100,18 @@
           </svg>
           <span>Участники</span>
         </button>
+        <button id="navProfile" class="nav-btn" onclick="switchPage('profile')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"></circle>
+            <path d="M4 20c0-3.87 3.58-7 8-7s8 3.13 8 7"></path>
+          </svg>
+          <span>Профиль</span>
+        </button>
       </nav>
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО -->
+  <!-- МОДАЛЬНОЕ ОКНО УРОКА -->
   <div id="modalBackdrop" class="modal-backdrop" onclick="if(event.target===this) closeModal()">
     <div class="modal" id="modalContent"></div>
   </div>
@@ -1166,7 +1168,6 @@
       10: '15:55 - 16:35'
     };
 
-    // Встроенное основное расписание (резерв, если таблица base_lessons ещё пуста)
     const DEFAULT_BASE_SCHEDULE = {
       1: [
         { lesson_number: 1, subject: 'Разговор о важном', teacher: 'Захарова И.Б.', lesson_time: '08:15 - 08:55' },
@@ -1268,6 +1269,32 @@
     let suppressNextClick = false;
     let toastTimer = null;
 
+    // --- ТЕМА И ЦВЕТ ВЕРХНЕЙ ПАНЕЛИ (ЧЁЛКИ) ---
+    const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function updateStatusBarColor(theme) {
+      const isDark = theme === 'dark' || (theme === 'auto' && darkMedia.matches);
+      const color = isDark ? '#000000' : '#f2f2f7';
+      const meta = document.getElementById('themeColorMeta');
+      if (meta) meta.setAttribute('content', color);
+      document.documentElement.style.backgroundColor = color;
+    }
+
+    function applyTheme(theme) {
+      const val = theme || 'auto';
+      localStorage.setItem('diary_theme', val);
+      if (val === 'auto') document.documentElement.removeAttribute('data-theme');
+      else document.documentElement.setAttribute('data-theme', val);
+      updateStatusBarColor(val);
+    }
+
+    darkMedia.addEventListener('change', () => {
+      if ((localStorage.getItem('diary_theme') || 'auto') === 'auto') {
+        updateStatusBarColor('auto');
+      }
+    });
+    applyTheme(localStorage.getItem('diary_theme') || 'auto');
+
     function showToast(text) {
       const el = document.getElementById('toast');
       if (!el) return;
@@ -1276,14 +1303,6 @@
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
     }
-
-    function applyTheme(theme) {
-      const val = theme || 'auto';
-      localStorage.setItem('diary_theme', val);
-      if (val === 'auto') document.documentElement.removeAttribute('data-theme');
-      else document.documentElement.setAttribute('data-theme', val);
-    }
-    applyTheme(localStorage.getItem('diary_theme') || 'auto');
 
     function esc(str = '') {
       return String(str).replace(/[&<>"']/g, m => ({
@@ -1312,7 +1331,7 @@
       requestAnimationFrame(() => el.classList.add(cls));
     }
 
-    // --- НАДЕЖНАЯ ЗАГРУЗКА SUPABASE ---
+    // --- ЗАГРУЗКА SUPABASE БЕЗ ЗАВИСАНИЙ ---
     function loadScript(src, timeoutMs = 6000) {
       return new Promise((resolve, reject) => {
         const s = document.createElement('script');
@@ -1378,12 +1397,8 @@
       const splash = document.getElementById('splashView');
       if (!splash || splash.classList.contains('fade-out')) return;
       splash.classList.add('fade-out');
-      setTimeout(() => splash.classList.add('hidden'), 300);
+      setTimeout(() => splash.classList.add('hidden'), 280);
     }
-
-    window.addEventListener('error', e => {
-      if (!appReady) showSplashError(e.message || 'Ошибка скрипта');
-    });
 
     // --- ЗАПУСК ПРИЛОЖЕНИЯ ---
     async function enterApp(user) {
@@ -1392,6 +1407,7 @@
       initDaysBar();
       updateDaysUI();
       await loadHwData();
+      renderProfilePage();
       loadMembers(true);
       document.getElementById('authView').classList.add('hidden');
       document.getElementById('appView').classList.remove('hidden');
@@ -1407,7 +1423,15 @@
     async function initApp() {
       try {
         await ensureSupabase();
-        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Отключаем lock Web Locks API, который иногда зависает в Safari/PWA
+        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: false,
+            lock: (name, acquireTimeout, fn) => fn()
+          }
+        });
 
         db.auth.onAuthStateChange((event, session) => {
           if (!appReady) return;
@@ -1420,7 +1444,7 @@
 
         const res = await withTimeout(
           db.auth.getSession(),
-          8000,
+          7000,
           'Сервер Supabase не отвечает. Проверьте подключение к интернету.'
         );
         const session = res?.data?.session;
@@ -1428,8 +1452,8 @@
         if (session?.user) {
           await withTimeout(
             enterApp(session.user),
-            10000,
-            'Долгая загрузка данных расписания. Попробуйте обновить страницу.'
+            8000,
+            'Долгая загрузка данных. Нажмите «Повторить» или «Сбросить вход».'
           );
         } else {
           showAuthScreen();
@@ -1438,7 +1462,7 @@
         appReady = true;
         hideSplash();
       } catch (err) {
-        showSplashError(err?.message || 'Неизвестная ошибка запуска');
+        showSplashError(err?.message || 'Ошибка запуска приложения');
       }
     }
 
@@ -1559,7 +1583,7 @@
       if (db) await db.auth.signOut();
     }
 
-    // --- ПРОФИЛЬ ---
+    // --- ПРОФИЛЬ (ОТДЕЛЬНАЯ ВКЛАДКА ВНИЗУ) ---
     async function loadMyProfile() {
       const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
       currentProfile = data || { id: currentUser.id, email: currentUser.email, full_name: currentUser.email, role: 'user' };
@@ -1567,24 +1591,22 @@
       document.getElementById('addLessonBtn').classList.toggle('hidden', !admin);
       document.getElementById('adminScheduleBar').classList.toggle('hidden', !admin);
 
-      const name = safeFullName(currentProfile);
-      const shortName = name.split(' ')[0] || 'Профиль';
-      document.getElementById('headerName').textContent = shortName;
-
-      const avatarEl = document.getElementById('headerAvatar');
-      if (currentProfile.avatar_url) {
-        avatarEl.innerHTML = `<img src="${esc(currentProfile.avatar_url)}" alt="" />`;
-      } else {
-        avatarEl.textContent = shortName[0].toUpperCase();
-      }
-
       const roleLabels = { super_admin: 'Главный админ', admin: 'Админ', user: 'Ученик' };
-      const badge = document.getElementById('myRoleBadge');
-      badge.textContent = 'Вы: ' + (roleLabels[currentProfile.role] || 'Ученик');
-      badge.className = 'badge ' + (currentProfile.role === 'super_admin' ? 'orange' : currentProfile.role === 'admin' ? 'blue' : 'gray');
+      const roleCls = 'badge ' + (currentProfile.role === 'super_admin' ? 'orange' : currentProfile.role === 'admin' ? 'blue' : 'gray');
+
+      const badge1 = document.getElementById('myRoleBadge');
+      badge1.textContent = 'Вы: ' + (roleLabels[currentProfile.role] || 'Ученик');
+      badge1.className = roleCls;
+
+      const badge2 = document.getElementById('profRoleBadge');
+      badge2.textContent = roleLabels[currentProfile.role] || 'Ученик';
+      badge2.className = roleCls;
     }
 
-    function openProfileSettings() {
+    function renderProfilePage() {
+      const container = document.getElementById('profileContent');
+      if (!container || !currentProfile) return;
+
       const themes = ['auto', 'light', 'dark'];
       const currentTheme = localStorage.getItem('diary_theme') || 'auto';
       const themeIdx = Math.max(0, themes.indexOf(currentTheme));
@@ -1594,18 +1616,14 @@
         ? `<img src="${esc(currentProfile.avatar_url)}" alt="" />`
         : name[0].toUpperCase();
 
-      document.getElementById('modalContent').innerHTML = `
-        <div class="modal-head">
-          <h3>Настройки профиля</h3>
-          <button class="close-x" onclick="closeModal()">${ICON.close}</button>
-        </div>
-        <div class="stack">
+      container.innerHTML = `
+        <div class="profile-card stack">
           <div class="avatar-upload-wrap">
             <div class="avatar-large" id="profAvatarPreview">${avatarHtml}</div>
-            <div class="stack" style="gap:4px; flex:1;">
+            <div class="stack" style="gap:5px; flex:1;">
               <label class="btn sm secondary" style="cursor:pointer; width:fit-content;">
                 ${ICON.photo}
-                <span>Выбрать фото</span>
+                <span>Изменить фото</span>
                 <input type="file" accept="image/*" class="hidden" onchange="uploadAvatar(this.files[0])" />
               </label>
               <div style="font-size:12px; color:var(--muted);">Фото автоматически сожмётся</div>
@@ -1626,47 +1644,30 @@
             <label>Оформление</label>
             <div class="segmented" id="themeSegmented" style="--cols:3;">
               <div class="seg-slider" id="themeSlider" style="--idx:${themeIdx};"></div>
-              <button data-t="auto" class="${currentTheme === 'auto' ? 'active' : ''}" onclick="setThemeFromModal('auto', 0)">Авто</button>
-              <button data-t="light" class="${currentTheme === 'light' ? 'active' : ''}" onclick="setThemeFromModal('light', 1)">Светлая</button>
-              <button data-t="dark" class="${currentTheme === 'dark' ? 'active' : ''}" onclick="setThemeFromModal('dark', 2)">Тёмная</button>
+              <button data-t="auto" class="${currentTheme === 'auto' ? 'active' : ''}" onclick="setThemeFromProfile('auto', 0)">Авто</button>
+              <button data-t="light" class="${currentTheme === 'light' ? 'active' : ''}" onclick="setThemeFromProfile('light', 1)">Светлая</button>
+              <button data-t="dark" class="${currentTheme === 'dark' ? 'active' : ''}" onclick="setThemeFromProfile('dark', 2)">Тёмная</button>
             </div>
           </div>
 
           <div id="profMsg" class="msg"></div>
 
           <div class="row" style="justify-content:space-between; margin-top:4px;">
-            <button class="btn danger sm" onclick="signOut()">Выйти</button>
+            <button class="btn danger sm" onclick="signOut()">Выйти из аккаунта</button>
             <button class="btn sm" onclick="saveProfileName()">Сохранить</button>
           </div>
         </div>
       `;
-      openModal();
     }
 
-    const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
-
-    function updateStatusBarColor(theme) {
-      const isDark = theme === 'dark' || (theme === 'auto' && darkMedia.matches);
-      const color = isDark ? '#000000' : '#f2f2f7';
-      const meta = document.getElementById('themeColorMeta');
-      if (meta) meta.setAttribute('content', color);
-      document.documentElement.style.backgroundColor = color;
+    function setThemeFromProfile(theme, idx) {
+      applyTheme(theme);
+      const slider = document.getElementById('themeSlider');
+      if (slider) slider.style.setProperty('--idx', idx);
+      document.querySelectorAll('#themeSegmented button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.t === theme);
+      });
     }
-
-    function applyTheme(theme) {
-      const val = theme || 'auto';
-      localStorage.setItem('diary_theme', val);
-      if (val === 'auto') document.documentElement.removeAttribute('data-theme');
-      else document.documentElement.setAttribute('data-theme', val);
-      updateStatusBarColor(val);
-    }
-
-    darkMedia.addEventListener('change', () => {
-      if ((localStorage.getItem('diary_theme') || 'auto') === 'auto') {
-        updateStatusBarColor('auto');
-      }
-    });
-    applyTheme(localStorage.getItem('diary_theme') || 'auto');
 
     async function uploadAvatar(file) {
       if (!file) return;
@@ -1712,10 +1713,10 @@
       await loadMyProfile();
       loadMembers(true);
       msg.className = 'msg ok';
-      msg.textContent = 'Сохранено!';
+      msg.textContent = 'Имя сохранено!';
     }
 
-    // --- ОСНОВНОЕ РАСПИСАНИЕ (СОХРАНЕНИЕ / ВОССТАНОВЛЕНИЕ ДЛЯ ТЕКУЩЕГО ДНЯ) ---
+    // --- ОСНОВНОЕ РАСПИСАНИЕ ---
     async function saveCurrentDayAsBase() {
       const dayName = DAYS.find(d => d.id === selectedDay)?.full || 'этот день';
       const dayLessons = lessonsCache
@@ -1805,25 +1806,33 @@
       }
     }
 
-    // --- НАВИГАЦИЯ ---
+    // --- НАВИГАЦИЯ (3 ВКЛАДКИ) ---
     function switchPage(page) {
       if (currentPage === page) return;
       currentPage = page;
 
+      const pages = ['hw', 'members', 'profile'];
+      const idx = Math.max(0, pages.indexOf(page));
+
       const pageHw = document.getElementById('pageHw');
       const pageMembers = document.getElementById('pageMembers');
+      const pageProfile = document.getElementById('pageProfile');
 
-      document.getElementById('navSlider').style.setProperty('--idx', page === 'hw' ? 0 : 1);
+      document.getElementById('navSlider').style.setProperty('--idx', idx);
       document.getElementById('navHw').classList.toggle('active', page === 'hw');
       document.getElementById('navMembers').classList.toggle('active', page === 'members');
+      document.getElementById('navProfile').classList.toggle('active', page === 'profile');
 
       pageHw.classList.toggle('hidden', page !== 'hw');
       pageMembers.classList.toggle('hidden', page !== 'members');
+      pageProfile.classList.toggle('hidden', page !== 'profile');
 
-      playAnim(page === 'hw' ? pageHw : pageMembers, 'tab-enter');
+      const activeEl = page === 'hw' ? pageHw : page === 'members' ? pageMembers : pageProfile;
+      playAnim(activeEl, 'tab-enter');
 
       if (page === 'hw') loadHwData(true);
-      else loadMembers(true);
+      else if (page === 'members') loadMembers(true);
+      else renderProfilePage();
     }
 
     function initDaysBar() {
@@ -2134,7 +2143,7 @@
       return null;
     }
 
-    // --- ЕДИНОЕ ОКНО УРОКА / ОКНА (БЕЗ ВЫБОРА ДНЯ, УЧИТЕЛЯ И ВРЕМЕНИ) ---
+    // --- ЕДИНОЕ ОКНО УРОКА / ОКНА ---
     let editingPhotos = [];
     let pendingFiles = [];
 
@@ -2417,7 +2426,7 @@
       document.getElementById('lightbox').classList.remove('open');
     }
 
-    // --- УЧАСТНИКИ (2 В ШИРИНУ, ФОТО 1:1, БЕЗ ПОЧТЫ) ---
+    // --- УЧАСТНИКИ ---
     async function loadMembers(silent = false) {
       const { data, error } = await db.from('profiles').select('*').order('created_at', { ascending: true });
       const list = document.getElementById('membersList');
