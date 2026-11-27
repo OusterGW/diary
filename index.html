@@ -2,8 +2,9 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Diary — Дневник класса</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/png" href="icon.png" />
@@ -14,7 +15,8 @@
       --bg: #f2f2f7;
       --surface: rgba(255, 255, 255, 0.88);
       --surface-solid: #ffffff;
-      --topbar: rgba(242, 242, 247, 0.84);
+      --topbar: rgba(242, 242, 247, 0.78);
+      --dock-bg: rgba(255, 255, 255, 0.82);
       --input-bg: #ffffff;
       --subtle-bg: rgba(118, 118, 128, 0.12);
       --seg-active: #ffffff;
@@ -26,9 +28,13 @@
       --green: #34c759;
       --red: #ff3b30;
       --orange: #ff9500;
-      --shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
-      --radius: 16px;
+      --shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+      --dock-shadow: 0 10px 32px rgba(0, 0, 0, 0.12);
+      --radius: 18px;
+      --app-width: 520px;
       --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --spring: cubic-bezier(0.22, 1, 0.36, 1);
+      --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     @media (prefers-color-scheme: dark) {
@@ -36,7 +42,8 @@
         --bg: #000000;
         --surface: rgba(28, 28, 30, 0.88);
         --surface-solid: #1c1c1e;
-        --topbar: rgba(20, 20, 22, 0.84);
+        --topbar: rgba(18, 18, 20, 0.78);
+        --dock-bg: rgba(34, 34, 38, 0.84);
         --input-bg: #2c2c2e;
         --subtle-bg: rgba(118, 118, 128, 0.24);
         --seg-active: #3a3a3c;
@@ -49,6 +56,7 @@
         --red: #ff453a;
         --orange: #ff9f0a;
         --shadow: 0 10px 34px rgba(0, 0, 0, 0.45);
+        --dock-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
       }
     }
 
@@ -56,7 +64,8 @@
       --bg: #000000;
       --surface: rgba(28, 28, 30, 0.88);
       --surface-solid: #1c1c1e;
-      --topbar: rgba(20, 20, 22, 0.84);
+      --topbar: rgba(18, 18, 20, 0.78);
+      --dock-bg: rgba(34, 34, 38, 0.84);
       --input-bg: #2c2c2e;
       --subtle-bg: rgba(118, 118, 128, 0.24);
       --seg-active: #3a3a3c;
@@ -69,24 +78,56 @@
       --red: #ff453a;
       --orange: #ff9f0a;
       --shadow: 0 10px 34px rgba(0, 0, 0, 0.45);
+      --dock-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body {
+
+    html, body {
       margin: 0;
+      padding: 0;
+      min-height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
+      transition: background-color 0.28s ease, color 0.28s ease;
+    }
+
+    body {
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
     .hidden { display: none !important; }
     svg { display: block; flex-shrink: 0; }
 
-    /* Auth */
+    /* Анимации появления */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(10px) scale(0.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes pageFade {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes checkPop {
+      0% { transform: scale(0.8); }
+      55% { transform: scale(1.18); }
+      100% { transform: scale(1); }
+    }
+
+    .page-animate {
+      animation: pageFade 0.34s var(--spring) both;
+    }
+
+    .card-animate {
+      animation: fadeSlideUp 0.36s var(--spring) both;
+      animation-delay: calc(var(--i, 0) * 32ms);
+    }
+
+    /* Экран авторизации (одинаковый на всех экранах) */
     .auth-wrap {
       min-height: 100vh;
       display: flex;
@@ -98,28 +139,31 @@
       width: 100%;
       max-width: 390px;
       background: var(--surface);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
       border: 1px solid var(--border);
-      border-radius: 24px;
+      border-radius: 26px;
       padding: 28px;
       box-shadow: var(--shadow);
+      animation: fadeSlideUp 0.42s var(--spring) both;
     }
-    .auth-card h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.4px; }
+    .auth-card h1 { margin: 0 0 6px; font-size: 28px; font-weight: 800; letter-spacing: -0.6px; }
     .auth-card p { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
 
-    /* Top & Bottom Bars */
+    /* Верхняя панель (единый размер на всех устройствах) */
     .topbar {
       position: sticky;
       top: 0;
       z-index: 20;
       background: var(--topbar);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
       border-bottom: 1px solid var(--border);
+      transition: background-color 0.28s ease, border-color 0.28s ease;
     }
     .topbar-inner {
-      max-width: 620px;
+      width: 100%;
+      max-width: var(--app-width);
       margin: 0 auto;
       padding: 12px 16px;
       display: flex;
@@ -128,26 +172,49 @@
     }
     .brand { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
 
-    .bottom-nav {
+    /* Плавающая нижняя панель (одинаковая на ПК и телефонах) */
+    .bottom-nav-wrap {
       position: fixed;
-      bottom: 0;
       left: 0;
       right: 0;
+      bottom: calc(14px + var(--safe-bottom));
       z-index: 30;
-      background: var(--topbar);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      border-top: 1px solid var(--border);
-      padding-bottom: var(--safe-bottom);
-    }
-    .bottom-nav-inner {
-      max-width: 620px;
-      margin: 0 auto;
       display: flex;
-      height: 56px;
+      justify-content: center;
+      padding: 0 16px;
+      pointer-events: none;
+    }
+    .bottom-nav {
+      pointer-events: auto;
+      position: relative;
+      width: 100%;
+      max-width: 310px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      padding: 5px;
+      border-radius: 24px;
+      background: var(--dock-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      box-shadow: var(--dock-shadow);
+      transition: background-color 0.28s ease, border-color 0.28s ease;
+    }
+    .nav-slider {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: calc((100% - 10px) / 2);
+      height: calc(100% - 10px);
+      border-radius: 19px;
+      background: var(--subtle-bg);
+      transform: translateX(calc(var(--idx, 0) * 100%));
+      transition: transform 0.36s var(--spring), background-color 0.25s ease;
+      pointer-events: none;
     }
     .nav-btn {
-      flex: 1;
+      position: relative;
+      z-index: 1;
       border: none;
       background: transparent;
       color: var(--muted);
@@ -156,42 +223,31 @@
       align-items: center;
       justify-content: center;
       gap: 3px;
+      padding: 7px 0;
       font-size: 11px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: color 0.15s ease;
-    }
-    .nav-btn.active { color: var(--accent); }
-    .nav-btn svg { width: 22px; height: 22px; }
-
-    /* Segmented Control */
-    .segmented {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      background: var(--subtle-bg);
-      padding: 3px;
-      border-radius: 12px;
-      gap: 2px;
-      width: 100%;
-    }
-    .segmented button {
-      background: transparent;
-      color: var(--muted);
-      border: none;
-      padding: 8px 6px;
-      border-radius: 9px;
-      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: 0.16s ease;
+      transition: color 0.2s ease, transform 0.16s var(--spring);
     }
-    .segmented button.active {
-      background: var(--seg-active);
-      color: var(--text);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+    .nav-btn:active { transform: scale(0.93); }
+    .nav-btn.active { color: var(--accent); }
+    .nav-btn svg {
+      width: 21px;
+      height: 21px;
+      transition: transform 0.3s var(--bounce);
+    }
+    .nav-btn.active svg { transform: scale(1.08); }
+
+    /* Единый контейнер приложения */
+    .container {
+      width: 100%;
+      max-width: var(--app-width);
+      margin: 0 auto;
+      padding: 16px 16px calc(96px + var(--safe-bottom));
+      flex: 1;
     }
 
-    /* Avatar & Profile Pill */
+    /* Профиль в шапке */
     .profile-pill {
       display: inline-flex;
       align-items: center;
@@ -199,12 +255,14 @@
       background: var(--subtle-bg);
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 3px 11px 3px 3px;
+      padding: 3px 12px 3px 3px;
       border-radius: 999px;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
+      transition: transform 0.18s var(--spring), background-color 0.2s ease;
     }
+    .profile-pill:active { transform: scale(0.95); }
     .avatar {
       width: 28px;
       height: 28px;
@@ -221,25 +279,32 @@
     }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-    .container {
-      width: 100%;
-      max-width: 620px;
-      margin: 0 auto;
-      padding: 16px 16px 88px;
-      flex: 1;
-    }
-
-    /* Days Bar (Пн-Пт) */
+    /* Вкладки дней недели (Пн–Пт) со скользящим индикатором */
     .days-bar {
+      position: relative;
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
       background: var(--subtle-bg);
       padding: 4px;
       border-radius: 14px;
       margin-bottom: 16px;
     }
+    .day-slider {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: calc((100% - 8px) / 5);
+      height: calc(100% - 8px);
+      border-radius: 10px;
+      background: var(--seg-active);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      transform: translateX(calc(var(--idx, 0) * 100%));
+      transition: transform 0.34s var(--spring), background-color 0.25s ease;
+      pointer-events: none;
+    }
     .day-btn {
+      position: relative;
+      z-index: 1;
       border: none;
       background: transparent;
       padding: 9px 0;
@@ -249,13 +314,48 @@
       color: var(--muted);
       cursor: pointer;
       text-align: center;
-      transition: 0.15s;
+      transition: color 0.2s ease, transform 0.15s ease;
     }
-    .day-btn.active {
+    .day-btn:active { transform: scale(0.94); }
+    .day-btn.active { color: var(--text); }
+
+    /* Переключатель темы со скользящим индикатором */
+    .segmented {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: var(--subtle-bg);
+      padding: 3px;
+      border-radius: 12px;
+      width: 100%;
+    }
+    .seg-slider {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: calc((100% - 6px) / 3);
+      height: calc(100% - 6px);
+      border-radius: 9px;
       background: var(--seg-active);
-      color: var(--text);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+      transform: translateX(calc(var(--idx, 0) * 100%));
+      transition: transform 0.32s var(--spring), background-color 0.25s ease;
+      pointer-events: none;
     }
+    .segmented button {
+      position: relative;
+      z-index: 1;
+      background: transparent;
+      color: var(--muted);
+      border: none;
+      padding: 8px 6px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+    .segmented button.active { color: var(--text); }
 
     .section-head {
       display: flex;
@@ -264,9 +364,9 @@
       gap: 12px;
       margin-bottom: 12px;
     }
-    .section-head h2 { margin: 0; font-size: 20px; font-weight: 700; }
+    .section-head h2 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
 
-    /* Controls */
+    /* Поля и кнопки */
     .field { display: flex; flex-direction: column; gap: 6px; }
     .field label { font-size: 13px; font-weight: 600; color: var(--muted); }
     input, textarea, select {
@@ -279,8 +379,12 @@
       font-family: inherit;
       color: var(--text);
       outline: none;
+      transition: border-color 0.2s ease, background-color 0.25s ease, box-shadow 0.2s ease;
     }
-    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.14);
+    }
     textarea { resize: vertical; min-height: 86px; }
 
     .btn {
@@ -296,33 +400,39 @@
       cursor: pointer;
       background: var(--accent);
       color: #fff;
+      transition: transform 0.16s var(--spring), background-color 0.2s ease, opacity 0.2s ease;
     }
+    .btn:active { transform: scale(0.95); }
     .btn.secondary { background: var(--subtle-bg); color: var(--text); }
     .btn.danger { background: rgba(255, 59, 48, 0.14); color: var(--red); }
     .btn.sm { padding: 8px 12px; font-size: 13px; border-radius: 10px; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
     .stack { display: flex; flex-direction: column; gap: 12px; }
     .row { display: flex; gap: 10px; align-items: center; }
 
-    /* Lesson Cards */
-    .lesson-list { display: flex; flex-direction: column; gap: 8px; }
+    /* Карточки уроков */
+    .lesson-list { display: flex; flex-direction: column; gap: 9px; }
     .lesson-card {
       display: flex;
       align-items: center;
       gap: 12px;
       background: var(--surface);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 12px 14px;
+      padding: 13px 14px;
       cursor: pointer;
+      transition: transform 0.2s var(--spring), box-shadow 0.2s ease, background-color 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
     }
+    .lesson-card:active { transform: scale(0.98); }
     .lesson-card.cancelled {
       background: rgba(255, 59, 48, 0.07);
-      border-color: rgba(255, 59, 48, 0.25);
+      border-color: rgba(255, 59, 48, 0.26);
     }
-    .lesson-card.done .lesson-title {
+    .lesson-card.done { opacity: 0.72; }
+    .lesson-card.done .lesson-title span:first-child {
       text-decoration: line-through;
       color: var(--muted);
     }
@@ -340,14 +450,20 @@
       cursor: pointer;
       padding: 0;
       color: #fff;
+      transition: background-color 0.22s ease, border-color 0.22s ease, transform 0.18s var(--spring);
     }
-    .check-btn.checked { background: var(--green); border-color: var(--green); }
+    .check-btn:active { transform: scale(0.86); }
+    .check-btn.checked {
+      background: var(--green);
+      border-color: var(--green);
+      animation: checkPop 0.34s var(--bounce);
+    }
 
     .lesson-num {
-      width: 26px;
-      height: 26px;
-      min-width: 26px;
-      border-radius: 8px;
+      width: 27px;
+      height: 27px;
+      min-width: 27px;
+      border-radius: 9px;
       background: rgba(0, 122, 255, 0.12);
       color: var(--accent);
       font-weight: 700;
@@ -367,20 +483,20 @@
       margin-top: 4px;
       font-size: 13px;
       color: var(--text);
-      opacity: 0.78;
+      opacity: 0.8;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    /* Badges */
+    /* Бейджи */
     .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 999px; font-size: 11px; font-weight: 600; }
     .badge.red { background: rgba(255, 59, 48, 0.14); color: var(--red); }
     .badge.blue { background: rgba(0, 122, 255, 0.14); color: var(--accent); }
     .badge.orange { background: rgba(255, 149, 0, 0.16); color: var(--orange); }
     .badge.gray { background: var(--subtle-bg); color: var(--muted); }
 
-    /* Member Cards */
+    /* Карточки участников */
     .member-card {
       display: flex;
       align-items: center;
@@ -390,38 +506,53 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 12px 14px;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
     .member-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .member-name { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .member-email { font-size: 12px; color: var(--muted); margin-top: 1px; }
 
-    /* Modal iOS Sheet */
+    /* Единое всплывающее окно (одинаковое на всех устройствах) */
     .modal-backdrop {
       position: fixed;
       inset: 0;
       z-index: 50;
       background: rgba(0, 0, 0, 0.45);
       backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: center;
+      padding: 16px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.26s ease, visibility 0.26s ease;
     }
-    @media (min-width: 520px) {
-      .modal-backdrop { align-items: center; padding: 16px; }
+    .modal-backdrop.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
     }
     .modal {
       width: 100%;
+      max-width: 470px;
+      max-height: 88vh;
+      overflow-y: auto;
       background: var(--surface-solid);
       border: 1px solid var(--border);
-      border-radius: 22px 22px 0 0;
-      max-height: 92vh;
-      overflow-y: auto;
-      padding: 20px 16px calc(20px + var(--safe-bottom));
-      box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.28);
+      transform: translateY(22px) scale(0.95);
+      opacity: 0;
+      transition: transform 0.36s var(--spring), opacity 0.24s ease, background-color 0.25s ease;
     }
-    @media (min-width: 520px) {
-      .modal { border-radius: 22px; max-width: 500px; padding: 22px; }
+    .modal-backdrop.open .modal {
+      transform: translateY(0) scale(1);
+      opacity: 1;
     }
+
     .modal-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
     .modal-head h3 { margin: 0; font-size: 19px; font-weight: 700; }
     .close-x {
@@ -436,13 +567,23 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      transition: transform 0.16s var(--spring), background-color 0.2s ease;
     }
-    .hw-box { background: var(--bg); border: 1px solid var(--border); padding: 12px 14px; border-radius: 12px; font-size: 15px; line-height: 1.45; white-space: pre-wrap; margin-bottom: 12px; }
+    .close-x:active { transform: scale(0.88); }
+    .hw-box { background: var(--bg); border: 1px solid var(--border); padding: 12px 14px; border-radius: 14px; font-size: 15px; line-height: 1.45; white-space: pre-wrap; margin-bottom: 12px; }
 
-    /* Photos */
-    .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 6px; margin-bottom: 8px; }
-    .photo-item { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 1; background: var(--subtle-bg); }
-    .photo-item img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
+    /* Фотографии */
+    .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 7px; margin-bottom: 8px; }
+    .photo-item {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 1;
+      background: var(--subtle-bg);
+      animation: fadeSlideUp 0.28s var(--spring) both;
+    }
+    .photo-item img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; transition: transform 0.2s ease; }
+    .photo-item img:active { transform: scale(0.96); }
     .photo-del {
       position: absolute;
       top: 4px;
@@ -472,20 +613,95 @@
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
+      transition: border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
     }
+    .upload-zone:active { transform: scale(0.98); }
 
-    .empty { text-align: center; padding: 36px 16px; color: var(--muted); background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .empty {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      animation: fadeSlideUp 0.3s var(--spring) both;
+    }
     .msg { font-size: 12px; color: var(--red); min-height: 16px; }
     .msg.ok { color: var(--green); }
-    .toggle-row { display: flex; align-items: center; gap: 10px; padding: 11px 13px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 13px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
     .toggle-row input { width: auto; accent-color: var(--red); }
 
-    .avatar-upload-wrap { display: flex; align-items: center; gap: 14px; background: var(--bg); border: 1px solid var(--border); padding: 12px; border-radius: 14px; }
-    .avatar-large { width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; overflow: hidden; flex-shrink: 0; }
+    .avatar-upload-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 14px;
+    }
+    .avatar-large {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
     .avatar-large img { width: 100%; height: 100%; object-fit: cover; }
 
-    .lightbox { position: fixed; inset: 0; z-index: 80; background: rgba(0, 0, 0, 0.94); display: flex; align-items: center; justify-content: center; padding: 16px; cursor: zoom-out; }
-    .lightbox img { max-width: 100%; max-height: 90vh; border-radius: 10px; }
+    /* Лайтбокс с плавным зумом */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      cursor: zoom-out;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.26s ease, visibility 0.26s ease;
+    }
+    .lightbox.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .lightbox img {
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: 14px;
+      transform: scale(0.92);
+      transition: transform 0.34s var(--spring);
+    }
+    .lightbox.open img { transform: scale(1); }
   </style>
 </head>
 <body>
@@ -520,8 +736,10 @@
 
     <main class="container">
       <!-- СТРАНИЦА ДЗ -->
-      <section id="pageHw">
-        <div class="days-bar" id="daysBar"></div>
+      <section id="pageHw" class="page-animate">
+        <div class="days-bar" id="daysBar">
+          <div class="day-slider" id="daySlider"></div>
+        </div>
         <div class="section-head">
           <h2 id="dayTitle">Понедельник</h2>
           <button id="addLessonBtn" class="btn sm hidden" onclick="openLessonModal(null)">
@@ -542,9 +760,10 @@
       </section>
     </main>
 
-    <!-- НИЖНЯЯ НАВИГАЦИЯ (однотонные Apple-иконки) -->
-    <nav class="bottom-nav">
-      <div class="bottom-nav-inner">
+    <!-- ЕДИНАЯ ПЛАВАЮЩАЯ НИЖНЯЯ НАВИГАЦИЯ -->
+    <div class="bottom-nav-wrap">
+      <nav class="bottom-nav">
+        <div class="nav-slider" id="navSlider"></div>
         <button id="navHw" class="nav-btn active" onclick="switchPage('hw')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="4" width="18" height="17" rx="3"></rect>
@@ -564,17 +783,17 @@
           </svg>
           <span>Участники</span>
         </button>
-      </div>
-    </nav>
+      </nav>
+    </div>
   </div>
 
-  <!-- МОДАЛКИ -->
-  <div id="modalBackdrop" class="modal-backdrop hidden" onclick="if(event.target===this) closeModal()">
+  <!-- МОДАЛЬНОЕ ОКНО -->
+  <div id="modalBackdrop" class="modal-backdrop" onclick="if(event.target===this) closeModal()">
     <div class="modal" id="modalContent"></div>
   </div>
 
   <!-- ЛАЙТБОКС -->
-  <div id="lightbox" class="lightbox hidden" onclick="this.classList.add('hidden')">
+  <div id="lightbox" class="lightbox" onclick="closeLightbox()">
     <img id="lightboxImg" src="" alt="Фото ДЗ" />
   </div>
 
@@ -624,7 +843,6 @@
       9: '15:05 - 15:45'
     };
 
-    // Однотонные иконки в стиле Apple (SF Symbols)
     const ICON = {
       close: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
       check: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
@@ -640,8 +858,9 @@
     let currentPage = 'hw';
     let lessonsCache = [];
     let completedSet = new Set();
+    let daysInitialized = false;
 
-    // --- ОПТИМИЗАЦИЯ И СЖАТИЕ ФОТО (Canvas -> JPEG) ---
+    // --- ОПТИМИЗАЦИЯ И СЖАТИЕ ФОТО ---
     function compressImage(file, maxSide = 1280, quality = 0.78) {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -661,8 +880,7 @@
           const canvas = document.createElement('canvas');
           canvas.width = width;
           canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
           canvas.toBlob(
             blob => blob ? resolve(blob) : reject(new Error('Не удалось сжать фото')),
             'image/jpeg',
@@ -694,13 +912,15 @@
       }[m]));
     }
 
+    // --- AUTH ---
     db.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
         currentUser = session.user;
         await loadMyProfile();
         document.getElementById('authView').classList.add('hidden');
         document.getElementById('appView').classList.remove('hidden');
-        renderDays();
+        initDaysBar();
+        updateDaysUI();
         await loadHwData();
         if (currentPage === 'members') await loadMembers();
       } else {
@@ -764,7 +984,9 @@
 
     // --- НАСТРОЙКИ ПРОФИЛЯ ---
     function openProfileSettings() {
+      const themes = ['auto', 'light', 'dark'];
       const currentTheme = localStorage.getItem('diary_theme') || 'auto';
+      const themeIdx = Math.max(0, themes.indexOf(currentTheme));
       const avatarHtml = currentProfile.avatar_url
         ? `<img src="${esc(currentProfile.avatar_url)}" alt="" />`
         : currentProfile.full_name[0].toUpperCase();
@@ -776,7 +998,7 @@
         </div>
         <div class="stack">
           <div class="avatar-upload-wrap">
-            <div class="avatar-large">${avatarHtml}</div>
+            <div class="avatar-large" id="profAvatarPreview">${avatarHtml}</div>
             <div class="stack" style="gap:4px; flex:1;">
               <label class="btn sm secondary" style="cursor:pointer; width:fit-content;">
                 ${ICON.photo}
@@ -794,10 +1016,11 @@
 
           <div class="field">
             <label>Оформление</label>
-            <div class="segmented">
-              <button class="${currentTheme === 'auto' ? 'active' : ''}" onclick="setThemeFromModal('auto')">Авто</button>
-              <button class="${currentTheme === 'light' ? 'active' : ''}" onclick="setThemeFromModal('light')">Светлая</button>
-              <button class="${currentTheme === 'dark' ? 'active' : ''}" onclick="setThemeFromModal('dark')">Тёмная</button>
+            <div class="segmented" id="themeSegmented">
+              <div class="seg-slider" id="themeSlider" style="--idx:${themeIdx}"></div>
+              <button data-t="auto" class="${currentTheme === 'auto' ? 'active' : ''}" onclick="setThemeFromModal('auto', 0)">Авто</button>
+              <button data-t="light" class="${currentTheme === 'light' ? 'active' : ''}" onclick="setThemeFromModal('light', 1)">Светлая</button>
+              <button data-t="dark" class="${currentTheme === 'dark' ? 'active' : ''}" onclick="setThemeFromModal('dark', 2)">Тёмная</button>
             </div>
           </div>
 
@@ -809,12 +1032,16 @@
           </div>
         </div>
       `;
-      document.getElementById('modalBackdrop').classList.remove('hidden');
+      openModal();
     }
 
-    function setThemeFromModal(theme) {
+    function setThemeFromModal(theme, idx) {
       applyTheme(theme);
-      openProfileSettings();
+      const slider = document.getElementById('themeSlider');
+      if (slider) slider.style.setProperty('--idx', idx);
+      document.querySelectorAll('#themeSegmented button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.t === theme);
+      });
     }
 
     async function uploadAvatar(file) {
@@ -838,7 +1065,10 @@
         if (dbErr) throw dbErr;
 
         await loadMyProfile();
-        openProfileSettings();
+        const prev = document.getElementById('profAvatarPreview');
+        if (prev) prev.innerHTML = `<img src="${esc(pub.publicUrl)}" alt="" />`;
+        msg.className = 'msg ok';
+        msg.textContent = 'Фото профиля обновлено!';
       } catch (err) {
         msg.textContent = 'Ошибка: ' + err.message;
       }
@@ -855,32 +1085,64 @@
       if (error) { msg.textContent = error.message; return; }
 
       await loadMyProfile();
+      if (currentPage === 'members') await loadMembers();
       msg.className = 'msg ok';
       msg.textContent = 'Сохранено!';
     }
 
     // --- НАВИГАЦИЯ ---
     function switchPage(page) {
+      if (currentPage === page) return;
       currentPage = page;
-      document.getElementById('pageHw').classList.toggle('hidden', page !== 'hw');
-      document.getElementById('pageMembers').classList.toggle('hidden', page !== 'members');
+
+      const pageHw = document.getElementById('pageHw');
+      const pageMembers = document.getElementById('pageMembers');
+      const slider = document.getElementById('navSlider');
+
+      slider.style.setProperty('--idx', page === 'hw' ? 0 : 1);
       document.getElementById('navHw').classList.toggle('active', page === 'hw');
       document.getElementById('navMembers').classList.toggle('active', page === 'members');
+
+      pageHw.classList.toggle('hidden', page !== 'hw');
+      pageMembers.classList.toggle('hidden', page !== 'members');
+
+      const activeSec = page === 'hw' ? pageHw : pageMembers;
+      activeSec.classList.remove('page-animate');
+      void activeSec.offsetWidth;
+      activeSec.classList.add('page-animate');
+
       if (page === 'hw') loadHwData();
       else loadMembers();
     }
 
-    function renderDays() {
-      document.getElementById('daysBar').innerHTML = DAYS.map(d => `
-        <button class="day-btn ${d.id === selectedDay ? 'active' : ''}" onclick="selectDay(${d.id})">${d.short}</button>
-      `).join('');
-      document.getElementById('dayTitle').textContent = DAYS.find(d => d.id === selectedDay).full;
+    function initDaysBar() {
+      if (daysInitialized) return;
+      const bar = document.getElementById('daysBar');
+      DAYS.forEach(d => {
+        const btn = document.createElement('button');
+        btn.className = 'day-btn';
+        btn.dataset.day = d.id;
+        btn.textContent = d.short;
+        btn.onclick = () => selectDay(d.id);
+        bar.appendChild(btn);
+      });
+      daysInitialized = true;
+    }
+
+    function updateDaysUI() {
+      const idx = DAYS.findIndex(d => d.id === selectedDay);
+      document.getElementById('daySlider').style.setProperty('--idx', Math.max(0, idx));
+      document.querySelectorAll('#daysBar .day-btn').forEach(btn => {
+        btn.classList.toggle('active', Number(btn.dataset.day) === selectedDay);
+      });
+      document.getElementById('dayTitle').textContent = DAYS[idx]?.full || 'Понедельник';
     }
 
     function selectDay(dayId) {
+      if (selectedDay === dayId) return;
       selectedDay = dayId;
-      renderDays();
-      renderLessons();
+      updateDaysUI();
+      renderLessons(true);
     }
 
     // --- УРОКИ И ДЗ ---
@@ -891,10 +1153,10 @@
       ]);
       lessonsCache = lessonsRes.data || [];
       completedSet = new Set((compRes.data || []).map(r => r.lesson_id));
-      renderLessons();
+      renderLessons(true);
     }
 
-    function renderLessons() {
+    function renderLessons(animate = false) {
       const list = document.getElementById('lessonsList');
       const dayLessons = lessonsCache.filter(l => l.day_of_week === selectedDay);
 
@@ -908,13 +1170,14 @@
         return;
       }
 
-      list.innerHTML = dayLessons.map(l => {
+      list.innerHTML = dayLessons.map((l, idx) => {
         const done = completedSet.has(l.id);
         const photosCount = (l.photo_urls || []).length;
         const meta = [l.lesson_time, l.teacher].filter(Boolean).map(esc).join(' · ');
 
         return `
-          <div class="lesson-card ${l.is_cancelled ? 'cancelled' : ''} ${done ? 'done' : ''}" onclick="openLessonModal(${l.id})">
+          <div class="lesson-card ${animate ? 'card-animate' : ''} ${l.is_cancelled ? 'cancelled' : ''} ${done ? 'done' : ''}"
+               style="--i:${idx}" data-lesson-id="${l.id}" onclick="openLessonModal(${l.id})">
             <button class="check-btn ${done ? 'checked' : ''}" onclick="event.stopPropagation(); toggleDone(${l.id})">
               ${done ? ICON.check : ''}
             </button>
@@ -935,13 +1198,18 @@
 
     async function toggleDone(lessonId) {
       const wasDone = completedSet.has(lessonId);
+      const card = document.querySelector(`.lesson-card[data-lesson-id="${lessonId}"]`);
+      const checkBtn = card?.querySelector('.check-btn');
+
       if (wasDone) {
         completedSet.delete(lessonId);
-        renderLessons();
+        card?.classList.remove('done');
+        if (checkBtn) { checkBtn.classList.remove('checked'); checkBtn.innerHTML = ''; }
         await db.from('user_completions').delete().eq('user_id', currentUser.id).eq('lesson_id', lessonId);
       } else {
         completedSet.add(lessonId);
-        renderLessons();
+        card?.classList.add('done');
+        if (checkBtn) { checkBtn.classList.add('checked'); checkBtn.innerHTML = ICON.check; }
         await db.from('user_completions').upsert({ user_id: currentUser.id, lesson_id: lessonId, completed: true });
       }
     }
@@ -953,7 +1221,6 @@
     function openLessonModal(lessonId) {
       const l = lessonId ? lessonsCache.find(x => x.id === lessonId) : null;
 
-      // Для обычных учеников — только просмотр ДЗ и фото
       if (!isAdmin()) {
         if (!l) return;
         const photos = (l.photo_urls || []).map(url => `
@@ -975,16 +1242,15 @@
           </div>
           <div class="hw-box">${l.homework ? esc(l.homework) : '<span style="color:var(--muted)">Домашнее задание не задано</span>'}</div>
           ${photos ? `<div class="photo-grid">${photos}</div>` : ''}
-          <button class="btn ${done ? 'secondary' : ''} sm" style="width:100%; margin-top:6px;"
-            onclick="toggleDone(${l.id}); openLessonModal(${l.id});">
+          <button id="modalDoneBtn" class="btn ${done ? 'secondary' : ''} sm" style="width:100%; margin-top:6px;"
+            onclick="toggleDoneInModal(${l.id}, false)">
             ${done ? `${ICON.check}<span>Сделано (снять отметку)</span>` : 'Отметить сделанным'}
           </button>
         `;
-        document.getElementById('modalBackdrop').classList.remove('hidden');
+        openModal();
         return;
       }
 
-      // Для админов — всё в одном окне (отметка, редактирование, фото, удаление)
       editingPhotos = l ? [...(l.photo_urls || [])] : [];
       pendingFiles = [];
       const dayVal = l ? l.day_of_week : selectedDay;
@@ -1000,8 +1266,8 @@
         </div>
         <div class="stack">
           ${l ? `
-            <button class="btn ${done ? '' : 'secondary'} sm" style="width:100%;"
-              onclick="toggleDone(${l.id}); openLessonModal(${l.id});">
+            <button id="modalDoneBtn" class="btn ${done ? '' : 'secondary'} sm" style="width:100%;"
+              onclick="toggleDoneInModal(${l.id}, true)">
               ${done ? `${ICON.check}<span>Отмечено выполненным у вас</span>` : 'Отметить выполненным у себя'}
             </button>
           ` : ''}
@@ -1067,7 +1333,21 @@
         </div>
       `;
       renderEditingPhotos();
-      document.getElementById('modalBackdrop').classList.remove('hidden');
+      openModal();
+    }
+
+    async function toggleDoneInModal(lessonId, isAdminView) {
+      await toggleDone(lessonId);
+      const done = completedSet.has(lessonId);
+      const btn = document.getElementById('modalDoneBtn');
+      if (!btn) return;
+      if (isAdminView) {
+        btn.className = `btn ${done ? '' : 'secondary'} sm`;
+        btn.innerHTML = done ? `${ICON.check}<span>Отмечено выполненным у вас</span>` : 'Отметить выполненным у себя';
+      } else {
+        btn.className = `btn ${done ? 'secondary' : ''} sm`;
+        btn.innerHTML = done ? `${ICON.check}<span>Сделано (снять отметку)</span>` : 'Отметить сделанным';
+      }
     }
 
     function autoFillTime(num) {
@@ -1139,7 +1419,7 @@
 
         selectedDay = day_of_week;
         closeModal();
-        renderDays();
+        updateDaysUI();
         await loadHwData();
       } catch (err) {
         msg.textContent = err.message;
@@ -1156,13 +1436,21 @@
       await loadHwData();
     }
 
+    function openModal() {
+      document.getElementById('modalBackdrop').classList.add('open');
+    }
+
     function closeModal() {
-      document.getElementById('modalBackdrop').classList.add('hidden');
+      document.getElementById('modalBackdrop').classList.remove('open');
     }
 
     function openLightbox(url) {
       document.getElementById('lightboxImg').src = url;
-      document.getElementById('lightbox').classList.remove('hidden');
+      document.getElementById('lightbox').classList.add('open');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
     }
 
     // --- УЧАСТНИКИ ---
@@ -1180,14 +1468,14 @@
         user: '<span class="badge gray">Ученик</span>'
       };
 
-      list.innerHTML = data.map(u => {
+      list.innerHTML = data.map((u, idx) => {
         const canManage = isSuperAdmin() && u.role !== 'super_admin' && u.id !== currentUser.id;
         const avatarHtml = u.avatar_url
           ? `<img src="${esc(u.avatar_url)}" alt="" />`
           : (u.full_name[0] || '?').toUpperCase();
 
         return `
-          <div class="member-card">
+          <div class="member-card card-animate" style="--i:${idx}">
             <div class="member-info">
               <div class="avatar" style="width:36px; height:36px; font-size:14px;">${avatarHtml}</div>
               <div>
