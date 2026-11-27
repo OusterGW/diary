@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Diary — Дневник класса</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -14,56 +14,57 @@
       --input-bg: #ffffff;
       --subtle-bg: rgba(118, 118, 128, 0.12);
       --text: #1c1c1e;
-      --muted: #6e6e73;
-      --border: rgba(60, 60, 67, 0.13);
+      --muted: #8e8e93;
+      --border: rgba(60, 60, 67, 0.12);
       --accent: #007aff;
       --accent-hover: #0062cc;
       --green: #34c759;
       --red: #ff3b30;
       --orange: #ff9500;
-      --shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
       --radius: 16px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]) {
         --bg: #000000;
-        --surface: rgba(28, 28, 30, 0.86);
+        --surface: rgba(28, 28, 30, 0.85);
         --surface-solid: #1c1c1e;
         --topbar: rgba(20, 20, 22, 0.82);
         --input-bg: #2c2c2e;
         --subtle-bg: rgba(118, 118, 128, 0.24);
         --text: #f5f5f7;
-        --muted: #98989d;
-        --border: rgba(255, 255, 255, 0.12);
+        --muted: #8e8e93;
+        --border: rgba(255, 255, 255, 0.1);
         --accent: #0a84ff;
         --accent-hover: #409cff;
         --green: #30d158;
         --red: #ff453a;
         --orange: #ff9f0a;
-        --shadow: 0 10px 34px rgba(0, 0, 0, 0.45);
+        --shadow: 0 10px 34px rgba(0, 0, 0, 0.4);
       }
     }
 
     :root[data-theme="dark"] {
       --bg: #000000;
-      --surface: rgba(28, 28, 30, 0.86);
+      --surface: rgba(28, 28, 30, 0.85);
       --surface-solid: #1c1c1e;
       --topbar: rgba(20, 20, 22, 0.82);
       --input-bg: #2c2c2e;
       --subtle-bg: rgba(118, 118, 128, 0.24);
       --text: #f5f5f7;
-      --muted: #98989d;
-      --border: rgba(255, 255, 255, 0.12);
+      --muted: #8e8e93;
+      --border: rgba(255, 255, 255, 0.1);
       --accent: #0a84ff;
       --accent-hover: #409cff;
       --green: #30d158;
       --red: #ff453a;
       --orange: #ff9f0a;
-      --shadow: 0 10px 34px rgba(0, 0, 0, 0.45);
+      --shadow: 0 10px 34px rgba(0, 0, 0, 0.4);
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
@@ -71,7 +72,8 @@
       color: var(--text);
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
-      transition: background 0.2s ease, color 0.2s ease;
+      display: flex;
+      flex-direction: column;
     }
 
     .hidden { display: none !important; }
@@ -91,14 +93,14 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--border);
-      border-radius: 22px;
+      border-radius: 24px;
       padding: 28px;
       box-shadow: var(--shadow);
     }
     .auth-card h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.4px; }
     .auth-card p { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
 
-    /* Header */
+    /* Top and Bottom Bars */
     .topbar {
       position: sticky;
       top: 0;
@@ -109,114 +111,133 @@
       border-bottom: 1px solid var(--border);
     }
     .topbar-inner {
-      max-width: 780px;
+      max-width: 600px;
       margin: 0 auto;
       padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
     }
-    .brand { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
-    .segmented {
-      display: inline-flex;
-      background: var(--subtle-bg);
-      padding: 3px;
-      border-radius: 12px;
-      gap: 2px;
+    .brand { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 30;
+      background: var(--topbar);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      padding-bottom: var(--safe-bottom);
     }
-    .segmented button {
+    .bottom-nav-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      height: 56px;
+    }
+    .nav-btn {
+      flex: 1;
+      border: none;
       background: transparent;
       color: var(--muted);
-      border: none;
-      padding: 7px 14px;
-      border-radius: 9px;
-      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: 10px;
       font-weight: 500;
       cursor: pointer;
-      transition: 0.16s ease;
     }
-    .segmented button.active {
-      background: var(--surface-solid);
-      color: var(--text);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
+    .nav-btn.active { color: var(--accent); }
+    .nav-icon { font-size: 20px; line-height: 1; }
+
+    /* Avatar & Profile Pill */
     .profile-pill {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       background: var(--subtle-bg);
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 5px 11px 5px 6px;
+      padding: 3px 10px 3px 3px;
       border-radius: 999px;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: 0.15s;
     }
-    .profile-pill:hover { opacity: 0.85; }
     .avatar {
-      width: 26px;
-      height: 26px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       background: var(--accent);
       color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 700;
+      overflow: hidden;
     }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
     .container {
-      max-width: 780px;
+      width: 100%;
+      max-width: 600px;
       margin: 0 auto;
-      padding: 18px 16px 70px;
+      padding: 16px 16px 86px;
+      flex: 1;
     }
 
-    /* Days Tabs */
+    /* Days Tab - Swipe/Scroll */
     .days-bar {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      display: flex;
       gap: 6px;
-      background: var(--subtle-bg);
-      padding: 4px;
-      border-radius: 14px;
-      margin-bottom: 18px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 16px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    .days-bar::-webkit-scrollbar { display: none; }
     .day-btn {
+      flex: 1;
+      min-width: 60px;
       border: none;
-      background: transparent;
-      padding: 9px 4px;
-      border-radius: 10px;
-      font-size: 14px;
+      background: var(--subtle-bg);
+      padding: 10px 0;
+      border-radius: 12px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--muted);
       cursor: pointer;
-      transition: 0.15s;
+      text-align: center;
     }
     .day-btn.active {
       background: var(--surface-solid);
       color: var(--text);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow);
     }
 
+    /* Sections */
     .section-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
-    .section-head h2 { margin: 0; font-size: 21px; letter-spacing: -0.3px; }
+    .section-head h2 { margin: 0; font-size: 20px; font-weight: 700; }
 
-    /* Form Controls */
+    /* Inputs, Buttons, Utilities */
     .field { display: flex; flex-direction: column; gap: 6px; }
     .field label { font-size: 13px; font-weight: 600; color: var(--muted); }
     input, textarea, select {
       width: 100%;
-      padding: 11px 14px;
+      padding: 12px 14px;
       border: 1px solid var(--border);
       border-radius: 12px;
       background: var(--input-bg);
@@ -226,14 +247,14 @@
       outline: none;
     }
     input:focus, textarea:focus, select:focus { border-color: var(--accent); }
-    textarea { resize: vertical; min-height: 92px; }
+    textarea { resize: vertical; min-height: 90px; }
 
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 10px 16px;
+      padding: 11px 16px;
       border: none;
       border-radius: 12px;
       font-size: 14px;
@@ -241,40 +262,31 @@
       cursor: pointer;
       background: var(--accent);
       color: #fff;
-      transition: 0.15s;
     }
-    .btn:hover { background: var(--accent-hover); }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn.secondary { background: var(--subtle-bg); color: var(--text); }
-    .btn.secondary:hover { opacity: 0.85; }
     .btn.danger { background: rgba(255, 59, 48, 0.14); color: var(--red); }
-    .btn.danger:hover { background: rgba(255, 59, 48, 0.22); }
-    .btn.sm { padding: 7px 13px; font-size: 13px; border-radius: 10px; }
+    .btn.sm { padding: 8px 12px; font-size: 13px; border-radius: 10px; }
+    .btn:disabled { opacity: 0.5; }
 
     .stack { display: flex; flex-direction: column; gap: 12px; }
     .row { display: flex; gap: 10px; align-items: center; }
 
     /* Lesson Cards */
-    .lesson-list { display: flex; flex-direction: column; gap: 10px; }
+    .lesson-list { display: flex; flex-direction: column; gap: 8px; }
     .lesson-card {
       display: flex;
       align-items: center;
       gap: 12px;
       background: var(--surface);
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(10px);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px 16px;
+      padding: 12px 14px;
       cursor: pointer;
-      transition: transform 0.12s ease, box-shadow 0.15s ease;
-    }
-    .lesson-card:hover {
-      box-shadow: var(--shadow);
-      transform: translateY(-1px);
     }
     .lesson-card.cancelled {
-      background: rgba(255, 59, 48, 0.08);
-      border-color: rgba(255, 59, 48, 0.28);
+      background: rgba(255, 59, 48, 0.06);
+      border-color: rgba(255, 59, 48, 0.2);
     }
     .lesson-card.done .lesson-title {
       text-decoration: line-through;
@@ -294,60 +306,35 @@
       cursor: pointer;
       padding: 0;
       color: #fff;
-      font-size: 13px;
-      transition: 0.15s;
+      font-size: 12px;
     }
     .check-btn.checked { background: var(--green); border-color: var(--green); }
 
     .lesson-num {
-      width: 28px;
-      height: 28px;
-      min-width: 28px;
-      border-radius: 9px;
-      background: rgba(0, 122, 255, 0.14);
+      width: 26px;
+      height: 26px;
+      min-width: 26px;
+      border-radius: 8px;
+      background: rgba(0, 122, 255, 0.1);
       color: var(--accent);
       font-weight: 700;
-      font-size: 14px;
+      font-size: 13px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .lesson-card.cancelled .lesson-num {
-      background: rgba(255, 59, 48, 0.16);
-      color: var(--red);
-    }
     .lesson-info { flex: 1; min-width: 0; }
-    .lesson-title {
-      font-size: 16px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .lesson-preview {
-      margin-top: 3px;
-      font-size: 13px;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    .lesson-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .lesson-preview { margin-top: 2px; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     /* Badges */
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-    .badge.red { background: rgba(255, 59, 48, 0.16); color: var(--red); }
-    .badge.blue { background: rgba(0, 122, 255, 0.16); color: var(--accent); }
-    .badge.orange { background: rgba(255, 149, 0, 0.18); color: var(--orange); }
+    .badge { display: inline-block; padding: 2px 6px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .badge.red { background: rgba(255, 59, 48, 0.12); color: var(--red); }
+    .badge.blue { background: rgba(0, 122, 255, 0.12); color: var(--accent); }
+    .badge.orange { background: rgba(255, 149, 0, 0.14); color: var(--orange); }
     .badge.gray { background: var(--subtle-bg); color: var(--muted); }
 
-    /* Members */
+    /* Member Cards */
     .member-card {
       display: flex;
       align-items: center;
@@ -356,159 +343,67 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px 16px;
+      padding: 12px 14px;
     }
-    .member-name { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .member-email { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .member-info { display: flex; align-items: center; gap: 10px; }
+    .member-name { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 6px; }
+    .member-email { font-size: 12px; color: var(--muted); margin-top: 1px; }
 
-    /* Modal */
+    /* Modal iOS style */
     .modal-backdrop {
       position: fixed;
       inset: 0;
       z-index: 50;
-      background: rgba(0, 0, 0, 0.45);
-      backdrop-filter: blur(6px);
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
-      padding: 16px;
+    }
+    @media (min-width: 520px) {
+      .modal-backdrop { align-items: center; padding: 16px; }
     }
     .modal {
       width: 100%;
-      max-width: 520px;
-      max-height: 90vh;
-      overflow-y: auto;
       background: var(--surface-solid);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      padding: 22px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      border-radius: 20px 20px 0 0;
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 20px 16px calc(20px + var(--safe-bottom));
+      box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.1);
     }
-    .modal-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 16px;
+    @media (min-width: 520px) {
+      .modal { border-radius: 20px; max-width: 500px; padding: 22px; }
     }
-    .modal-head h3 { margin: 0; font-size: 20px; }
-    .close-x {
-      background: var(--subtle-bg);
-      border: none;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 15px;
-      color: var(--text);
-    }
-    .hw-box {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      padding: 14px;
-      border-radius: 14px;
-      font-size: 15px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      margin-bottom: 14px;
-    }
+    .modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+    .modal-head h3 { margin: 0; font-size: 19px; font-weight: 700; }
+    .close-x { background: var(--subtle-bg); border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; color: var(--text); }
+    .hw-box { background: var(--bg); border: 1px solid var(--border); padding: 12px; border-radius: 12px; font-size: 15px; line-height: 1.45; white-space: pre-wrap; margin-bottom: 12px; }
 
-    /* Photo upload & grid */
-    .upload-zone {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      padding: 16px;
-      border: 1.5px dashed var(--border);
-      border-radius: 14px;
-      background: var(--bg);
-      color: var(--muted);
-      font-size: 14px;
-      cursor: pointer;
-      text-align: center;
-      transition: 0.15s;
-    }
-    .upload-zone:hover { border-color: var(--accent); color: var(--accent); }
-    .photo-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-    .photo-item {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      aspect-ratio: 1;
-      background: var(--subtle-bg);
-    }
-    .photo-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      cursor: zoom-in;
-      display: block;
-    }
-    .photo-del {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      border: none;
-      background: rgba(0, 0, 0, 0.7);
-      color: #fff;
-      cursor: pointer;
-      font-size: 12px;
-    }
+    /* Image grid */
+    .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 6px; margin-bottom: 8px; }
+    .photo-item { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 1; background: var(--subtle-bg); }
+    .photo-item img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-del { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; border: none; background: rgba(0,0,0,0.7); color:#fff; cursor:pointer; font-size:11px; }
 
-    .lightbox {
-      position: fixed;
-      inset: 0;
-      z-index: 80;
-      background: rgba(0, 0, 0, 0.92);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      cursor: zoom-out;
-    }
-    .lightbox img { max-width: 100%; max-height: 92vh; border-radius: 12px; }
+    .upload-zone { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 14px; border: 1.5px dashed var(--border); border-radius: 12px; background: var(--bg); color: var(--muted); font-size: 13px; text-align: center; }
 
-    .empty {
-      text-align: center;
-      padding: 42px 16px;
-      color: var(--muted);
-      background: var(--surface);
-      border: 1px dashed var(--border);
-      border-radius: var(--radius);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
-    .msg { font-size: 13px; color: var(--red); min-height: 18px; }
+    .empty { text-align: center; padding: 36px 16px; color: var(--muted); background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .msg { font-size: 12px; color: var(--red); min-height: 16px; }
     .msg.ok { color: var(--green); }
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-    }
+    .toggle-row { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; }
     .toggle-row input { width: auto; accent-color: var(--red); }
 
-    @media (max-width: 520px) {
-      .profile-name-text { display: none; }
-      .profile-pill { padding: 4px; }
+    /* Avatar Edit */
+    .avatar-upload-wrap { display: flex; align-items: center; gap: 14px; background: var(--bg); border: 1px solid var(--border); padding: 12px; border-radius: 14px; }
+    .avatar-large { width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; overflow: hidden; }
+    .avatar-large img { width: 100%; height: 100%; object-fit: cover; }
+
+    .lightbox { position: fixed; inset: 0; z-index: 80; background: rgba(0, 0, 0, 0.94); display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .lightbox img { max-width: 100%; max-height: 90vh; border-radius: 10px; }
+
+    @media (max-width: 400px) {
+      .day-btn { min-width: 52px; padding: 8px 0; font-size: 12px; }
     }
   </style>
 </head>
@@ -530,18 +425,14 @@
     </div>
   </div>
 
-  <!-- ПРИЛОЖЕНИЕ -->
+  <!-- ОСНОВНОЙ КОНТЕНТ -->
   <div id="appView" class="hidden">
     <header class="topbar">
       <div class="topbar-inner">
         <div class="brand">Diary</div>
-        <div class="segmented">
-          <button id="navHw" class="active" onclick="switchPage('hw')">ДЗ</button>
-          <button id="navMembers" onclick="switchPage('members')">Участники</button>
-        </div>
-        <button class="profile-pill" onclick="openProfileSettings()" title="Настройки профиля">
+        <button class="profile-pill" onclick="openProfileSettings()">
           <span id="headerAvatar" class="avatar">?</span>
-          <span id="headerName" class="profile-name-text">Профиль</span>
+          <span id="headerName">...</span>
         </button>
       </div>
     </header>
@@ -552,7 +443,7 @@
         <div class="days-bar" id="daysBar"></div>
         <div class="section-head">
           <h2 id="dayTitle">Понедельник</h2>
-          <button id="addLessonBtn" class="btn sm hidden" onclick="openEditor(null)">+ Добавить урок</button>
+          <button id="addLessonBtn" class="btn sm hidden" onclick="openEditor(null)">+ Урок</button>
         </div>
         <div id="lessonsList" class="lesson-list"></div>
       </section>
@@ -566,19 +457,32 @@
         <div id="membersList" class="stack"></div>
       </section>
     </main>
+
+    <!-- НИЖНЯЯ НАВИГАЦИЯ -->
+    <nav class="bottom-nav">
+      <div class="bottom-nav-inner">
+        <button id="navHw" class="nav-btn active" onclick="switchPage('hw')">
+          <span class="nav-icon">📅</span>
+          <span>ДЗ</span>
+        </button>
+        <button id="navMembers" class="nav-btn" onclick="switchPage('members')">
+          <span class="nav-icon">👥</span>
+          <span>Участники</span>
+        </button>
+      </div>
+    </nav>
   </div>
 
-  <!-- ОБЩЕЕ МОДАЛЬНОЕ ОКНО -->
+  <!-- МОДАЛКИ -->
   <div id="modalBackdrop" class="modal-backdrop hidden" onclick="if(event.target===this) closeModal()">
     <div class="modal" id="modalContent"></div>
   </div>
 
-  <!-- ПРОСМОТР ФОТО -->
+  <!-- ЛАЙТБОКС -->
   <div id="lightbox" class="lightbox hidden" onclick="this.classList.add('hidden')">
     <img id="lightboxImg" src="" alt="Фото ДЗ" />
   </div>
 
-  <!-- ПОДСКАЗКИ ПРЕДМЕТОВ -->
   <datalist id="subjectSuggestions">
     <option value="Алгебра"></option>
     <option value="Геометрия"></option>
@@ -616,7 +520,6 @@
     let lessonsCache = [];
     let completedSet = new Set();
 
-    // --- ТЕМА (Авто / Светлая / Темная) ---
     function applyTheme(theme) {
       const val = theme || 'auto';
       localStorage.setItem('diary_theme', val);
@@ -634,7 +537,6 @@
       }[m]));
     }
 
-    // --- AUTH ---
     db.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
         currentUser = session.user;
@@ -665,7 +567,7 @@
         options: { data: { full_name: fullName } }
       });
       if (error) msg.textContent = error.message;
-      else msg.textContent = 'Аккаунт создан! Если включено подтверждение почты — проверьте email.';
+      else msg.textContent = 'Успешно! Если есть подтверждение, проверьте почту.';
     }
 
     async function signIn() {
@@ -689,7 +591,13 @@
 
       const shortName = currentProfile.full_name.split(' ')[0] || 'Профиль';
       document.getElementById('headerName').textContent = shortName;
-      document.getElementById('headerAvatar').textContent = shortName[0].toUpperCase();
+
+      const avatarEl = document.getElementById('headerAvatar');
+      if (currentProfile.avatar_url) {
+        avatarEl.innerHTML = `<img src="${esc(currentProfile.avatar_url)}" alt="" />`;
+      } else {
+        avatarEl.textContent = shortName[0].toUpperCase();
+      }
 
       const roleLabels = { super_admin: 'Главный админ', admin: 'Админ', user: 'Ученик' };
       const badge = document.getElementById('myRoleBadge');
@@ -697,10 +605,12 @@
       badge.className = 'badge ' + (currentProfile.role === 'super_admin' ? 'orange' : currentProfile.role === 'admin' ? 'blue' : 'gray');
     }
 
-    // --- НАСТРОЙКИ ПРОФИЛЯ ---
+    // --- ПРОФИЛЬ И АВАТАР ---
     function openProfileSettings() {
       const currentTheme = localStorage.getItem('diary_theme') || 'auto';
-      const roleLabels = { super_admin: 'Главный админ', admin: 'Админ', user: 'Ученик' };
+      const avatarHtml = currentProfile.avatar_url 
+        ? `<img src="${esc(currentProfile.avatar_url)}" alt="" />`
+        : currentProfile.full_name[0].toUpperCase();
 
       document.getElementById('modalContent').innerHTML = `
         <div class="modal-head">
@@ -708,23 +618,24 @@
           <button class="close-x" onclick="closeModal()">✕</button>
         </div>
         <div class="stack">
-          <div class="row" style="justify-content:space-between; padding:12px 14px; background:var(--bg); border-radius:12px;">
-            <div>
-              <div style="font-weight:600;">${esc(currentProfile.email)}</div>
-              <div style="font-size:12px; color:var(--muted);">Роль: ${roleLabels[currentProfile.role]}</div>
+          <div class="avatar-upload-wrap">
+            <div class="avatar-large" id="avatarPreview">${avatarHtml}</div>
+            <div class="stack" style="gap:4px; flex:1;">
+              <label class="btn sm secondary" style="cursor:pointer; width:fit-content;">
+                Выбрать фото
+                <input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="uploadAvatar(this.files[0])" />
+              </label>
+              <div style="font-size:12px; color:var(--muted);">Квадратное фото подойдет лучше всего</div>
             </div>
-            <span class="badge ${currentProfile.role === 'super_admin' ? 'orange' : currentProfile.role === 'admin' ? 'blue' : 'gray'}">
-              ${roleLabels[currentProfile.role]}
-            </span>
           </div>
 
           <div class="field">
             <label>Имя и фамилия</label>
-            <input id="profNameInput" type="text" value="${esc(currentProfile.full_name)}" placeholder="Ваше имя" />
+            <input id="profNameInput" type="text" value="${esc(currentProfile.full_name)}" />
           </div>
 
           <div class="field">
-            <label>Тема оформления</label>
+            <label>Темное оформление</label>
             <div class="segmented" style="width:100%; display:grid; grid-template-columns:repeat(3,1fr);">
               <button class="${currentTheme === 'auto' ? 'active' : ''}" onclick="setThemeFromModal('auto')">Авто</button>
               <button class="${currentTheme === 'light' ? 'active' : ''}" onclick="setThemeFromModal('light')">Светлая</button>
@@ -735,8 +646,8 @@
           <div id="profMsg" class="msg"></div>
 
           <div class="row" style="justify-content:space-between; margin-top:6px;">
-            <button class="btn danger" onclick="signOut()">Выйти из аккаунта</button>
-            <button class="btn" onclick="saveProfileName()">Сохранить имя</button>
+            <button class="btn danger sm" onclick="signOut()">Выйти</button>
+            <button id="saveProfBtn" class="btn sm" onclick="saveProfileName()">Сохранить</button>
           </div>
         </div>
       `;
@@ -745,6 +656,26 @@
 
     function setThemeFromModal(theme) {
       applyTheme(theme);
+      openProfileSettings();
+    }
+
+    async function uploadAvatar(file) {
+      if (!file) return;
+      const msg = document.getElementById('profMsg');
+      msg.textContent = 'Загрузка...';
+
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `${currentUser.id}/${Date.now()}.${ext}`;
+
+      const { error: upErr } = await db.storage.from('avatars').upload(path, file, { cacheControl: '3600', upsert: true });
+      if (upErr) { msg.textContent = 'Ошибка загрузки: ' + upErr.message; return; }
+
+      const { data: pub } = db.storage.from('avatars').getPublicUrl(path);
+      const { error: dbErr } = await db.from('profiles').update({ avatar_url: pub.publicUrl }).eq('id', currentUser.id);
+
+      if (dbErr) { msg.textContent = dbErr.message; return; }
+
+      await loadMyProfile();
       openProfileSettings();
     }
 
@@ -759,9 +690,8 @@
       if (error) { msg.textContent = error.message; return; }
 
       await loadMyProfile();
-      if (currentPage === 'members') await loadMembers();
       msg.className = 'msg ok';
-      msg.textContent = 'Имя сохранено!';
+      msg.textContent = 'Сохранено!';
     }
 
     // --- НАВИГАЦИЯ ---
@@ -806,8 +736,8 @@
       if (!dayLessons.length) {
         list.innerHTML = `
           <div class="empty">
-            <div>На этот день уроков пока нет</div>
-            ${isAdmin() ? `<button class="btn sm" onclick="openEditor(null)">+ Добавить первый урок</button>` : ''}
+            <div>На сегодня ничего не запланировано</div>
+            ${isAdmin() ? `<button class="btn sm" onclick="openEditor(null)">Добавить урок</button>` : ''}
           </div>
         `;
         return;
@@ -820,8 +750,7 @@
 
         return `
           <div class="lesson-card ${l.is_cancelled ? 'cancelled' : ''} ${done ? 'done' : ''}" onclick="openLessonView(${l.id})">
-            <button class="check-btn ${done ? 'checked' : ''}" title="Отметить выполненным у себя"
-              onclick="event.stopPropagation(); toggleDone(${l.id})">${done ? '✓' : ''}</button>
+            <button class="check-btn ${done ? 'checked' : ''}" onclick="event.stopPropagation(); toggleDone(${l.id})">${done ? '✓' : ''}</button>
             <div class="lesson-num">${l.lesson_number}</div>
             <div class="lesson-info">
               <div class="lesson-title">
@@ -855,7 +784,7 @@
 
       const photos = (l.photo_urls || []).map(url => `
         <div class="photo-item">
-          <img src="${esc(url)}" onclick="openLightbox('${esc(url)}')" alt="Фото ДЗ" />
+          <img src="${esc(url)}" onclick="openLightbox('${esc(url)}')" alt="" />
         </div>
       `).join('');
 
@@ -868,20 +797,20 @@
           <button class="close-x" onclick="closeModal()">✕</button>
         </div>
 
-        <div class="hw-box">${l.homework ? esc(l.homework) : '<span style="color:var(--muted)">Домашнее задание не указано</span>'}</div>
+        <div class="hw-box">${l.homework ? esc(l.homework) : '<span style="color:var(--muted)">ДЗ не задано</span>'}</div>
         ${photos ? `<div class="photo-grid">${photos}</div>` : ''}
 
         <div class="row" style="justify-content: space-between; margin-top: 8px;">
-          <button class="btn secondary" onclick="toggleDone(${l.id}); openLessonView(${l.id});">
-            ${completedSet.has(l.id) ? '✓ Сделано (снять)' : 'Отметить сделанным'}
+          <button class="btn secondary sm" onclick="toggleDone(${l.id}); openLessonView(${l.id});">
+            ${completedSet.has(l.id) ? '✕ Не сделано' : '✓ Готово'}
           </button>
-          ${isAdmin() ? `<button class="btn" onclick="openEditor(${l.id})">Редактировать</button>` : ''}
+          ${isAdmin() ? `<button class="btn sm" onclick="openEditor(${l.id})">Изменить</button>` : ''}
         </div>
       `;
       document.getElementById('modalBackdrop').classList.remove('hidden');
     }
 
-    // --- УДОБНЫЙ РЕДАКТОР УРОКОВ (АДМИНЫ) ---
+    // --- РЕДАКТИРОВАНИЕ И УДАЛЕНИЕ ---
     let editingPhotos = [];
     let pendingFiles = [];
 
@@ -905,33 +834,32 @@
                 ${DAYS.map(d => `<option value="${d.id}" ${d.id === dayVal ? 'selected' : ''}>${d.full}</option>`).join('')}
               </select>
             </div>
-            <div class="field" style="width:105px;">
-              <label>№ урока</label>
+            <div class="field" style="width:90px;">
+              <label>Урок №</label>
               <input id="edNum" type="number" min="1" max="12" value="${l ? l.lesson_number : nextNum}" />
             </div>
           </div>
 
           <div class="field">
             <label>Предмет</label>
-            <input id="edSubj" list="subjectSuggestions" type="text" value="${l ? esc(l.subject) : ''}" placeholder="Выберите или введите предмет..." />
+            <input id="edSubj" list="subjectSuggestions" type="text" value="${l ? esc(l.subject) : ''}" placeholder="Математика..." />
           </div>
 
           <div class="field">
             <label>Домашнее задание</label>
-            <textarea id="edHw" placeholder="Например: §14, упр. 125–128">${l ? esc(l.homework) : ''}</textarea>
+            <textarea id="edHw" placeholder="Что задали...">${l ? esc(l.homework) : ''}</textarea>
           </div>
 
           <label class="toggle-row">
             <input id="edCancel" type="checkbox" ${l?.is_cancelled ? 'checked' : ''} />
-            <span>Урока не будет (отменить занятие)</span>
+            <span>Урока не будет (отменен)</span>
           </label>
 
           <div class="field">
             <label>Фотографии к ДЗ</label>
             <div id="edPhotoGrid" class="photo-grid"></div>
             <label class="upload-zone">
-              <strong>+ Выбрать фотографии</strong>
-              <span style="font-size:12px;">Можно выбрать сразу несколько</span>
+              <strong>+ Добавить фотографии</strong>
               <input id="edPhotoFile" type="file" accept="image/*" multiple class="hidden" onchange="handleNewPhotos(this.files)" />
             </label>
           </div>
@@ -939,10 +867,10 @@
           <div id="edMsg" class="msg"></div>
 
           <div class="row" style="justify-content: space-between; margin-top:6px;">
-            ${l ? `<button class="btn danger" onclick="deleteLesson(${l.id})">Удалить</button>` : '<span></span>'}
+            ${l ? `<button class="btn danger sm" onclick="deleteLesson(${l.id})">Удалить урок</button>` : '<span></span>'}
             <div class="row">
-              <button class="btn secondary" onclick="closeModal()">Отмена</button>
-              <button id="saveLessonBtn" class="btn" onclick="saveLesson(${l ? l.id : 'null'})">Сохранить</button>
+              <button class="btn secondary sm" onclick="closeModal()">Отмена</button>
+              <button id="saveLessonBtn" class="btn sm" onclick="saveLesson(${l ? l.id : 'null'})">Сохранить</button>
             </div>
           </div>
         </div>
@@ -1025,8 +953,18 @@
     }
 
     async function deleteLesson(lessonId) {
-      if (!confirm('Удалить этот урок из расписания?')) return;
-      await db.from('lessons').delete().eq('id', lessonId);
+      if (!confirm('Вы уверены, что хотите окончательно удалить этот урок из расписания?')) return;
+      
+      const btn = document.querySelector('.btn.danger');
+      if (btn) btn.disabled = true;
+
+      const { error } = await db.from('lessons').delete().eq('id', lessonId);
+      if (error) {
+        alert('Не удалось удалить: ' + error.message);
+        if (btn) btn.disabled = false;
+        return;
+      }
+
       closeModal();
       await loadHwData();
     }
@@ -1057,16 +995,23 @@
 
       list.innerHTML = data.map(u => {
         const canManage = isSuperAdmin() && u.role !== 'super_admin' && u.id !== currentUser.id;
+        const avatarHtml = u.avatar_url 
+          ? `<img src="${esc(u.avatar_url)}" alt="" />`
+          : (u.full_name[0] || '?').toUpperCase();
+
         return `
           <div class="member-card">
-            <div>
-              <div class="member-name">${esc(u.full_name)} ${labels[u.role]}</div>
-              <div class="member-email">${esc(u.email)}</div>
+            <div class="member-info">
+              <div class="avatar" style="width:34px; height:34px; font-size:14px;">${avatarHtml}</div>
+              <div>
+                <div class="member-name">${esc(u.full_name)} ${labels[u.role]}</div>
+                <div class="member-email">${esc(u.email)}</div>
+              </div>
             </div>
             ${canManage ? `
-              <button class="btn sm ${u.role === 'admin' ? 'danger' : 'secondary'}"
+              <button class="btn sm secondary" style="font-size:12px; padding:6px 10px;"
                 onclick="toggleAdminRole('${u.id}', '${u.role === 'admin' ? 'user' : 'admin'}')">
-                ${u.role === 'admin' ? 'Снять админа' : 'Сделать админом'}
+                ${u.role === 'admin' ? 'Снять' : 'Админ'}
               </button>
             ` : ''}
           </div>
