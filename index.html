@@ -168,6 +168,32 @@
       50% { transform: scale(1.04); }
     }
 
+    /* Уведомление Toast */
+    .toast {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      z-index: 95;
+      transform: translate3d(-50%, -20px, 0);
+      opacity: 0;
+      pointer-events: none;
+      background: var(--surface-solid);
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--dock-shadow);
+      border: 1px solid var(--border);
+      transition: transform 0.26s var(--ease-ios), opacity 0.22s ease;
+      max-width: calc(100vw - 32px);
+      text-align: center;
+    }
+    .toast.show {
+      transform: translate3d(-50%, 0, 0);
+      opacity: 1;
+    }
+
     /* Плавные GPU-анимации */
     @keyframes tabEnter {
       from { opacity: 0; transform: translate3d(0, 6px, 0); }
@@ -380,7 +406,7 @@
       background: var(--subtle-bg);
       padding: 4px;
       border-radius: 14px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
     .day-slider {
       position: absolute;
@@ -411,6 +437,19 @@
       transition: color 0.18s ease;
     }
     .day-btn.active { color: var(--text); }
+
+    /* Панель основного расписания для админов */
+    .admin-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .admin-bar .btn {
+      padding: 8px 10px;
+      font-size: 12px;
+      border-radius: 11px;
+    }
 
     /* Segmented Control */
     .segmented {
@@ -456,13 +495,24 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
     .section-head h2 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
 
     /* Поля и кнопки */
     .field { display: flex; flex-direction: column; gap: 6px; }
     .field label { font-size: 13px; font-weight: 600; color: var(--muted); }
+    .auto-meta {
+      font-size: 12px;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
     input, textarea, select {
       width: 100%;
       padding: 11px 13px;
@@ -505,7 +555,7 @@
     .stack { display: flex; flex-direction: column; gap: 12px; }
     .row { display: flex; gap: 10px; align-items: center; }
 
-    /* Карточки уроков и Drag-and-Drop */
+    /* Карточки уроков */
     .lesson-list {
       display: flex;
       flex-direction: column;
@@ -533,7 +583,7 @@
       color: var(--muted);
     }
 
-    /* Карточка окна ("Нет урока") — серый цвет */
+    /* Карточка окна ("Нет урока") */
     .lesson-card.window {
       background: var(--window-bg);
       box-shadow: none;
@@ -647,27 +697,80 @@
     }
 
     /* Бейджи */
-    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 999px; font-size: 11px; font-weight: 600; width: fit-content; }
     .badge.red { background: rgba(255, 59, 48, 0.14); color: var(--red); }
     .badge.blue { background: var(--accent-soft); color: var(--accent); }
     .badge.orange { background: rgba(255, 149, 0, 0.16); color: var(--orange); }
     .badge.gray { background: var(--subtle-bg); color: var(--muted); }
 
-    /* Карточки участников */
-    .member-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    /* Сетка участников: 2 в ширину, фото 1:1, подпись ниже, без почты */
+    .members-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
+    }
+    .member-card {
       background: var(--surface-solid);
       border: none;
       box-shadow: var(--card-shadow);
-      border-radius: var(--radius);
-      padding: 12px 14px;
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
-    .member-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
-    .member-name { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .member-email { font-size: 12px; color: var(--muted); margin-top: 1px; }
+    .member-photo {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: var(--subtle-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .member-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      cursor: zoom-in;
+    }
+    .member-photo-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 46px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-soft);
+      letter-spacing: -1px;
+    }
+    .member-body {
+      padding: 11px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+    .member-name {
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 1.25;
+      color: var(--text);
+      word-break: break-word;
+    }
+    .member-action {
+      margin-top: auto;
+      padding-top: 4px;
+    }
+    .member-action .btn {
+      width: 100%;
+      padding: 7px 8px;
+      font-size: 12px;
+      border-radius: 10px;
+    }
 
     /* Модальное окно */
     .modal-backdrop {
@@ -782,6 +885,7 @@
       flex-direction: column;
       align-items: center;
       gap: 10px;
+      grid-column: 1 / -1;
     }
     .msg { font-size: 13px; color: var(--red); min-height: 16px; line-height: 1.4; }
     .msg.ok { color: var(--green); }
@@ -807,9 +911,9 @@
       border-radius: 14px;
     }
     .avatar-large {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
       background: var(--accent);
       color: #fff;
       display: flex;
@@ -821,6 +925,19 @@
       flex-shrink: 0;
     }
     .avatar-large img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-email-row {
+      padding: 10px 13px;
+      border-radius: 12px;
+      background: var(--bg);
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      word-break: break-all;
+    }
+    .profile-email-row strong { color: var(--text); font-weight: 600; }
 
     /* Лайтбокс */
     .lightbox {
@@ -857,13 +974,16 @@
 </head>
 <body>
 
-  <!-- ЭКРАН ЗАГРУЗКИ (появляется мгновенно, без блокировки в <head>) -->
+  <!-- ЭКРАН ЗАГРУЗКИ -->
   <div id="splashView" class="splash-screen">
     <img src="icon.png" class="splash-icon" alt="Diary" onerror="this.style.display='none'" />
     <div class="splash-title">Diary</div>
     <div id="splashSpinner" class="spinner"></div>
     <div id="splashError" class="splash-error hidden"></div>
   </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast"></div>
 
   <!-- АВТОРИЗАЦИЯ -->
   <div id="authView" class="auth-wrap hidden">
@@ -931,6 +1051,19 @@
             <span>Урок</span>
           </button>
         </div>
+
+        <!-- Кнопки основного расписания для админов -->
+        <div id="adminScheduleBar" class="admin-bar hidden">
+          <button id="setBaseBtn" class="btn secondary" onclick="saveCurrentDayAsBase()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span>Сделать основным</span>
+          </button>
+          <button id="restoreBaseBtn" class="btn secondary" onclick="restoreDayFromBase()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            <span>Вернуть основное</span>
+          </button>
+        </div>
+
         <div id="lessonsList" class="lesson-list"></div>
       </section>
 
@@ -940,7 +1073,7 @@
           <h2>Участники</h2>
           <span id="myRoleBadge" class="badge gray"></span>
         </div>
-        <div id="membersList" class="stack"></div>
+        <div id="membersList" class="members-grid"></div>
       </section>
     </main>
 
@@ -978,7 +1111,7 @@
 
   <!-- ЛАЙТБОКС -->
   <div id="lightbox" class="lightbox" onclick="closeLightbox()">
-    <img id="lightboxImg" src="" alt="Фото ДЗ" />
+    <img id="lightboxImg" src="" alt="Фото" />
   </div>
 
   <datalist id="subjectSuggestions">
@@ -1000,20 +1133,6 @@
     <option value="Проектная деятельность"></option>
     <option value="Разговор о важном"></option>
     <option value="Россия — мои горизонты"></option>
-  </datalist>
-
-  <datalist id="teacherSuggestions">
-    <option value="Захарова И.Б."></option>
-    <option value="Милова В.В."></option>
-    <option value="Тихонькова Т.Н."></option>
-    <option value="Некратова Е.Ф."></option>
-    <option value="Вахрушева О.В."></option>
-    <option value="Бурнашова Н.Г."></option>
-    <option value="Григорьева Н.В."></option>
-    <option value="Ефимова Г.В."></option>
-    <option value="Авдеева Т.Д."></option>
-    <option value="Ветрова Е.В."></option>
-    <option value="Мазильникова Л."></option>
   </datalist>
 
   <script>
@@ -1040,6 +1159,60 @@
       8: '14:15 - 14:55',
       9: '15:05 - 15:45',
       10: '15:55 - 16:35'
+    };
+
+    // Встроенное основное расписание (резерв, если таблица base_lessons ещё пуста)
+    const DEFAULT_BASE_SCHEDULE = {
+      1: [
+        { lesson_number: 1, subject: 'Разговор о важном', teacher: 'Захарова И.Б.', lesson_time: '08:15 - 08:55' },
+        { lesson_number: 2, subject: 'Нет урока', teacher: '', lesson_time: '09:05 - 09:45' },
+        { lesson_number: 3, subject: 'Англ. язык', teacher: 'Милова В.В.', lesson_time: '09:55 - 10:35' },
+        { lesson_number: 4, subject: 'Русский язык', teacher: 'Тихонькова Т.Н.', lesson_time: '10:50 - 11:30' },
+        { lesson_number: 5, subject: 'Физика', teacher: 'Некратова Е.Ф.', lesson_time: '11:45 - 12:25' },
+        { lesson_number: 6, subject: 'Алгебра', teacher: 'Некратова Е.Ф.', lesson_time: '12:35 - 13:15' },
+        { lesson_number: 7, subject: 'Литература', teacher: 'Тихонькова Т.Н.', lesson_time: '13:25 - 14:05' },
+        { lesson_number: 8, subject: 'Алгебра', teacher: 'Некратова Е.Ф.', lesson_time: '14:15 - 14:55' }
+      ],
+      2: [
+        { lesson_number: 1, subject: 'Нет урока', teacher: '', lesson_time: '08:15 - 08:55' },
+        { lesson_number: 2, subject: 'Проектная деятельность', teacher: 'Вахрушева О.В.', lesson_time: '09:05 - 09:45' },
+        { lesson_number: 3, subject: 'Обществознание', teacher: 'Бурнашова Н.Г.', lesson_time: '09:55 - 10:35' },
+        { lesson_number: 4, subject: 'Англ. язык', teacher: 'Милова В.В.', lesson_time: '10:50 - 11:30' },
+        { lesson_number: 5, subject: 'Физика', teacher: 'Некратова Е.Ф.', lesson_time: '11:45 - 12:25' },
+        { lesson_number: 6, subject: 'Физкультура', teacher: 'Захарова И.Б.', lesson_time: '12:35 - 13:15' },
+        { lesson_number: 7, subject: 'Геометрия', teacher: 'Некратова Е.Ф.', lesson_time: '13:25 - 14:05' },
+        { lesson_number: 8, subject: 'Геометрия', teacher: 'Некратова Е.Ф.', lesson_time: '14:15 - 14:55' }
+      ],
+      3: [
+        { lesson_number: 1, subject: 'Англ. язык', teacher: 'Милова В.В.', lesson_time: '08:15 - 08:55' },
+        { lesson_number: 2, subject: 'Литература', teacher: 'Тихонькова Т.Н.', lesson_time: '09:05 - 09:45' },
+        { lesson_number: 3, subject: 'Алгебра', teacher: 'Некратова Е.Ф.', lesson_time: '09:55 - 10:35' },
+        { lesson_number: 4, subject: 'История', teacher: 'Бурнашова Н.Г.', lesson_time: '10:50 - 11:30' },
+        { lesson_number: 5, subject: 'Обществознание', teacher: 'Бурнашова Н.Г.', lesson_time: '11:45 - 12:25' },
+        { lesson_number: 6, subject: 'Физика', teacher: 'Некратова Е.Ф.', lesson_time: '12:35 - 13:15' },
+        { lesson_number: 7, subject: 'Информатика', teacher: 'Григорьева Н.В.', lesson_time: '13:25 - 14:05' }
+      ],
+      4: [
+        { lesson_number: 1, subject: 'Нет урока', teacher: '', lesson_time: '08:15 - 08:55' },
+        { lesson_number: 2, subject: 'Нет урока', teacher: '', lesson_time: '09:05 - 09:45' },
+        { lesson_number: 3, subject: 'Биология', teacher: 'Ефимова Г.В.', lesson_time: '09:55 - 10:35' },
+        { lesson_number: 4, subject: 'Русский язык', teacher: 'Тихонькова Т.Н.', lesson_time: '10:50 - 11:30' },
+        { lesson_number: 5, subject: 'Литература', teacher: 'Тихонькова Т.Н.', lesson_time: '11:45 - 12:25' },
+        { lesson_number: 6, subject: 'Химия', teacher: 'Авдеева Т.Д.', lesson_time: '12:35 - 13:15' },
+        { lesson_number: 7, subject: 'Физика', teacher: 'Некратова Е.Ф.', lesson_time: '13:25 - 14:05' },
+        { lesson_number: 8, subject: 'Геометрия', teacher: 'Некратова Е.Ф.', lesson_time: '14:15 - 14:55' },
+        { lesson_number: 9, subject: 'Россия — мои горизонты', teacher: 'Захарова И.Б.', lesson_time: '15:05 - 15:45' }
+      ],
+      5: [
+        { lesson_number: 1, subject: 'Физика', teacher: 'Некратова Е.Ф.', lesson_time: '08:15 - 08:55' },
+        { lesson_number: 2, subject: 'Нет урока', teacher: '', lesson_time: '09:05 - 09:45' },
+        { lesson_number: 3, subject: 'История', teacher: 'Бурнашова Н.Г.', lesson_time: '09:55 - 10:35' },
+        { lesson_number: 4, subject: 'География', teacher: 'Ветрова Е.В.', lesson_time: '10:50 - 11:30' },
+        { lesson_number: 5, subject: 'ОБЗР', teacher: 'Мазильникова Л.', lesson_time: '11:45 - 12:25' },
+        { lesson_number: 6, subject: 'Алгебра', teacher: 'Некратова Е.Ф.', lesson_time: '12:35 - 13:15' },
+        { lesson_number: 7, subject: 'Вероятность и статистика', teacher: 'Некратова Е.Ф.', lesson_time: '13:25 - 14:05' },
+        { lesson_number: 8, subject: 'Физкультура', teacher: 'Захарова И.Б.', lesson_time: '14:15 - 14:55' }
+      ]
     };
 
     const TEACHER_RULES = [
@@ -1071,7 +1244,8 @@
       plus: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
       grip: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="8" x2="19" y2="8"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="16" x2="19" y2="16"/></svg>`,
       mail: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 6L2 7"/></svg>`,
-      dash: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>`
+      dash: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+      clock: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>`
     };
 
     const today = new Date().getDay();
@@ -1087,6 +1261,16 @@
     let daysInitialized = false;
     let appReady = false;
     let suppressNextClick = false;
+    let toastTimer = null;
+
+    function showToast(text) {
+      const el = document.getElementById('toast');
+      if (!el) return;
+      el.textContent = text;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+    }
 
     function applyTheme(theme) {
       const val = theme || 'auto';
@@ -1123,7 +1307,7 @@
       requestAnimationFrame(() => el.classList.add(cls));
     }
 
-    // --- НАДЕЖНАЯ ЗАГРУЗКА SUPABASE + ЗАЩИТА ОТ ЧЁРНОГО ЭКРАНА ---
+    // --- НАДЕЖНАЯ ЗАГРУЗКА SUPABASE ---
     function loadScript(src, timeoutMs = 6000) {
       return new Promise((resolve, reject) => {
         const s = document.createElement('script');
@@ -1374,7 +1558,9 @@
     async function loadMyProfile() {
       const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
       currentProfile = data || { id: currentUser.id, email: currentUser.email, full_name: currentUser.email, role: 'user' };
-      document.getElementById('addLessonBtn').classList.toggle('hidden', !isAdmin());
+      const admin = isAdmin();
+      document.getElementById('addLessonBtn').classList.toggle('hidden', !admin);
+      document.getElementById('adminScheduleBar').classList.toggle('hidden', !admin);
 
       const name = safeFullName(currentProfile);
       const shortName = name.split(' ')[0] || 'Профиль';
@@ -1398,6 +1584,7 @@
       const currentTheme = localStorage.getItem('diary_theme') || 'auto';
       const themeIdx = Math.max(0, themes.indexOf(currentTheme));
       const name = safeFullName(currentProfile);
+      const email = currentProfile.email || currentUser?.email || '';
       const avatarHtml = currentProfile.avatar_url
         ? `<img src="${esc(currentProfile.avatar_url)}" alt="" />`
         : name[0].toUpperCase();
@@ -1418,6 +1605,11 @@
               </label>
               <div style="font-size:12px; color:var(--muted);">Фото автоматически сожмётся</div>
             </div>
+          </div>
+
+          <div class="profile-email-row">
+            <span>Почта</span>
+            <strong>${esc(email)}</strong>
           </div>
 
           <div class="field">
@@ -1462,7 +1654,7 @@
       msg.textContent = 'Сжатие и загрузка...';
 
       try {
-        const compressed = await compressImage(file, 400, 0.82);
+        const compressed = await compressImage(file, 500, 0.84);
         const path = `${currentUser.id}/${Date.now()}.jpg`;
         const { error: upErr } = await db.storage.from('avatars').upload(path, compressed, {
           contentType: 'image/jpeg',
@@ -1500,6 +1692,96 @@
       loadMembers(true);
       msg.className = 'msg ok';
       msg.textContent = 'Сохранено!';
+    }
+
+    // --- ОСНОВНОЕ РАСПИСАНИЕ (СОХРАНЕНИЕ / ВОССТАНОВЛЕНИЕ ДЛЯ ТЕКУЩЕГО ДНЯ) ---
+    async function saveCurrentDayAsBase() {
+      const dayName = DAYS.find(d => d.id === selectedDay)?.full || 'этот день';
+      const dayLessons = lessonsCache
+        .filter(l => l.day_of_week === selectedDay)
+        .sort((a, b) => a.lesson_number - b.lesson_number || a.id - b.id);
+
+      if (!dayLessons.length) {
+        showToast('На этот день нет уроков для сохранения');
+        return;
+      }
+      if (!confirm(`Сделать текущее расписание (${dayName}) основным?`)) return;
+
+      const btn = document.getElementById('setBaseBtn');
+      btn.disabled = true;
+
+      try {
+        const { error: delErr } = await db.from('base_lessons').delete().eq('day_of_week', selectedDay);
+        if (delErr) throw delErr;
+
+        const rows = dayLessons.map(l => ({
+          day_of_week: selectedDay,
+          lesson_number: l.lesson_number,
+          subject: l.subject,
+          teacher: isWindowLesson(l) ? '' : (l.teacher || findTeacherForSubject(l.subject) || ''),
+          lesson_time: LESSON_TIMES[l.lesson_number] || l.lesson_time || ''
+        }));
+
+        const { error: insErr } = await db.from('base_lessons').insert(rows);
+        if (insErr) throw insErr;
+
+        showToast(`Основное расписание (${dayName}) сохранено`);
+      } catch (err) {
+        alert('Ошибка сохранения основного расписания: ' + err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function restoreDayFromBase() {
+      const dayName = DAYS.find(d => d.id === selectedDay)?.full || 'этот день';
+      if (!confirm(`Вернуть основное расписание на ${dayName}? Текущие уроки и ДЗ за этот день будут заменены.`)) return;
+
+      const btn = document.getElementById('restoreBaseBtn');
+      btn.disabled = true;
+
+      try {
+        let baseRows = [];
+        const { data, error } = await db
+          .from('base_lessons')
+          .select('*')
+          .eq('day_of_week', selectedDay)
+          .order('lesson_number', { ascending: true });
+
+        if (!error && data && data.length) {
+          baseRows = data;
+        } else {
+          baseRows = (DEFAULT_BASE_SCHEDULE[selectedDay] || []).map(item => ({
+            ...item,
+            day_of_week: selectedDay
+          }));
+        }
+
+        const { error: delErr } = await db.from('lessons').delete().eq('day_of_week', selectedDay);
+        if (delErr) throw delErr;
+
+        if (baseRows.length) {
+          const payload = baseRows.map(r => ({
+            day_of_week: selectedDay,
+            lesson_number: r.lesson_number,
+            subject: r.subject,
+            teacher: r.teacher || '',
+            lesson_time: r.lesson_time || LESSON_TIMES[r.lesson_number] || '',
+            homework: '',
+            is_cancelled: false,
+            photo_urls: []
+          }));
+          const { error: insErr } = await db.from('lessons').insert(payload);
+          if (insErr) throw insErr;
+        }
+
+        await loadHwData();
+        showToast(`Расписание (${dayName}) восстановлено`);
+      } catch (err) {
+        alert('Ошибка восстановления: ' + err.message);
+      } finally {
+        btn.disabled = false;
+      }
     }
 
     // --- НАВИГАЦИЯ ---
@@ -1831,16 +2113,28 @@
       return null;
     }
 
-    function autoFillTeacher(subjectValue) {
-      const teacherInput = document.getElementById('edTeacher');
-      if (!teacherInput) return;
-      const found = findTeacherForSubject(subjectValue);
-      if (found) teacherInput.value = found;
-    }
-
-    // --- ЕДИНОЕ ОКНО УРОКА / ОКНА ---
+    // --- ЕДИНОЕ ОКНО УРОКА / ОКНА (БЕЗ ВЫБОРА ДНЯ, УЧИТЕЛЯ И ВРЕМЕНИ) ---
     let editingPhotos = [];
     let pendingFiles = [];
+
+    function updateAutoMetaPreview() {
+      const box = document.getElementById('autoMetaPreview');
+      if (!box) return;
+      const num = parseInt(document.getElementById('edNum')?.value, 10) || 1;
+      const timeStr = LESSON_TIMES[num] || 'время не задано';
+      const dayName = DAYS.find(d => d.id === selectedDay)?.full || '';
+
+      if (editorType === 'window') {
+        box.innerHTML = `${ICON.clock}<span>${esc(dayName)} · ${esc(timeStr)}</span>`;
+        return;
+      }
+
+      const subj = document.getElementById('edSubj')?.value || '';
+      const teacher = findTeacherForSubject(subj);
+      const parts = [dayName, timeStr];
+      if (teacher) parts.push(teacher);
+      box.innerHTML = `${ICON.clock}<span>${parts.map(esc).join(' · ')}</span>`;
+    }
 
     function switchEditorType(type) {
       editorType = type;
@@ -1852,7 +2146,6 @@
       document.getElementById('edTypeWindow')?.classList.toggle('active', isWin);
 
       document.getElementById('subjFieldWrap')?.classList.toggle('hidden', isWin);
-      document.getElementById('teacherFieldWrap')?.classList.toggle('hidden', isWin);
       document.getElementById('cancelFieldWrap')?.classList.toggle('hidden', isWin);
       document.getElementById('photosFieldWrap')?.classList.toggle('hidden', isWin);
 
@@ -1867,6 +2160,7 @@
           subjInput.value = '';
         }
       }
+      updateAutoMetaPreview();
     }
 
     function openLessonModal(lessonId) {
@@ -1902,11 +2196,9 @@
       editingPhotos = l ? [...(l.photo_urls || [])] : [];
       pendingFiles = [];
 
-      const dayVal = l ? l.day_of_week : selectedDay;
-      const dayLessons = lessonsCache.filter(x => x.day_of_week === dayVal);
+      const dayLessons = lessonsCache.filter(x => x.day_of_week === selectedDay);
       const maxNum = dayLessons.length ? Math.max(...dayLessons.map(x => x.lesson_number)) : 0;
       const numVal = l ? l.lesson_number : maxNum + 1;
-      const timeVal = l ? l.lesson_time : (LESSON_TIMES[numVal] || '');
       const idArg = l ? l.id : 'null';
 
       document.getElementById('modalContent').innerHTML = `
@@ -1922,37 +2214,19 @@
           </div>
 
           <div class="row">
-            <div class="field" style="flex:1;">
-              <label>День недели</label>
-              <select id="edDay">
-                ${DAYS.map(d => `<option value="${d.id}" ${d.id === dayVal ? 'selected' : ''}>${d.full}</option>`).join('')}
-              </select>
-            </div>
-            <div class="field" style="width:88px;">
+            <div class="field" style="width:92px;">
               <label>Урок №</label>
-              <input id="edNum" type="number" min="1" max="12" value="${numVal}" oninput="autoFillTime(this.value)" />
+              <input id="edNum" type="number" min="1" max="12" value="${numVal}" oninput="updateAutoMetaPreview()" />
+            </div>
+            <div id="subjFieldWrap" class="field" style="flex:1;">
+              <label>Предмет</label>
+              <input id="edSubj" list="subjectSuggestions" type="text"
+                value="${l && !isWin ? esc(l.subject) : ''}"
+                placeholder="Введите предмет..." />
             </div>
           </div>
 
-          <div id="subjFieldWrap" class="field">
-            <label>Предмет</label>
-            <input id="edSubj" list="subjectSuggestions" type="text"
-              value="${l && !isWin ? esc(l.subject) : ''}"
-              placeholder="Начните вводить предмет..." />
-          </div>
-
-          <div class="row">
-            <div id="teacherFieldWrap" class="field" style="flex:1;">
-              <label>Учитель</label>
-              <input id="edTeacher" list="teacherSuggestions" type="text"
-                value="${l && !isWin ? esc(l.teacher) : ''}"
-                placeholder="Подбирается автоматически" />
-            </div>
-            <div class="field" style="flex:1; min-width:130px;">
-              <label>Время</label>
-              <input id="edTime" type="text" value="${esc(timeVal)}" placeholder="08:15 - 08:55" />
-            </div>
-          </div>
+          <div id="autoMetaPreview" class="auto-meta"></div>
 
           <div class="field">
             <label id="hwLabel">Домашнее задание</label>
@@ -1987,20 +2261,12 @@
       `;
 
       const subjInput = document.getElementById('edSubj');
-      const triggerTeacher = () => autoFillTeacher(subjInput.value);
-      subjInput.addEventListener('input', triggerTeacher);
-      subjInput.addEventListener('change', triggerTeacher);
-      subjInput.addEventListener('keyup', triggerTeacher);
-      subjInput.addEventListener('blur', triggerTeacher);
+      subjInput.addEventListener('input', updateAutoMetaPreview);
+      subjInput.addEventListener('change', updateAutoMetaPreview);
 
       switchEditorType(editorType);
       renderEditingPhotos();
       openModal();
-    }
-
-    function autoFillTime(num) {
-      const timeInput = document.getElementById('edTime');
-      if (timeInput && LESSON_TIMES[num]) timeInput.value = LESSON_TIMES[num];
     }
 
     function handleNewPhotos(fileList) {
@@ -2033,9 +2299,10 @@
       const msg = document.getElementById('edMsg');
       msg.textContent = '';
 
-      const day_of_week = parseInt(document.getElementById('edDay').value, 10);
+      const existing = lessonId ? lessonsCache.find(x => x.id === lessonId) : null;
+      const day_of_week = existing ? existing.day_of_week : selectedDay;
       const lesson_number = parseInt(document.getElementById('edNum').value, 10) || 1;
-      const lesson_time = document.getElementById('edTime').value.trim();
+      const lesson_time = LESSON_TIMES[lesson_number] || '';
       const homework = document.getElementById('edHw').value.trim();
 
       let payload;
@@ -2053,11 +2320,13 @@
         };
       } else {
         const subject = document.getElementById('edSubj').value.trim();
-        let teacher = document.getElementById('edTeacher').value.trim();
         const is_cancelled = document.getElementById('edCancel').checked;
 
         if (!subject) { msg.textContent = 'Введите название предмета'; return; }
-        if (!teacher) teacher = findTeacherForSubject(subject) || '';
+
+        const teacher = findTeacherForSubject(subject)
+          || (existing && normSubj(existing.subject) === normSubj(subject) ? existing.teacher : '')
+          || '';
 
         btn.disabled = true;
         btn.textContent = pendingFiles.length ? 'Сжатие фото...' : 'Сохранение...';
@@ -2093,9 +2362,7 @@
 
         if (error) throw error;
 
-        selectedDay = day_of_week;
         closeModal();
-        updateDaysUI();
         await loadHwData();
       } catch (err) {
         msg.textContent = err.message;
@@ -2129,7 +2396,7 @@
       document.getElementById('lightbox').classList.remove('open');
     }
 
-    // --- УЧАСТНИКИ ---
+    // --- УЧАСТНИКИ (2 В ШИРИНУ, ФОТО 1:1, БЕЗ ПОЧТЫ) ---
     async function loadMembers(silent = false) {
       const { data, error } = await db.from('profiles').select('*').order('created_at', { ascending: true });
       const list = document.getElementById('membersList');
@@ -2157,25 +2424,25 @@
       list.innerHTML = membersCache.map(u => {
         const canManage = isSuperAdmin() && u.role !== 'super_admin' && u.id !== currentUser.id;
         const name = safeFullName(u);
-        const avatarHtml = u.avatar_url
-          ? `<img src="${esc(u.avatar_url)}" alt="" />`
-          : name[0].toUpperCase();
+        const photoHtml = u.avatar_url
+          ? `<img src="${esc(u.avatar_url)}" alt="${esc(name)}" onclick="openLightbox('${esc(u.avatar_url)}')" />`
+          : `<div class="member-photo-fallback">${esc(name[0].toUpperCase())}</div>`;
 
         return `
           <div class="member-card">
-            <div class="member-info">
-              <div class="avatar" style="width:36px; height:36px; font-size:14px;">${avatarHtml}</div>
-              <div>
-                <div class="member-name">${esc(name)} ${labels[u.role] || labels.user}</div>
-                <div class="member-email">${esc(u.email || '')}</div>
-              </div>
+            <div class="member-photo">${photoHtml}</div>
+            <div class="member-body">
+              <div class="member-name">${esc(name)}</div>
+              ${labels[u.role] || labels.user}
+              ${canManage ? `
+                <div class="member-action">
+                  <button class="btn ${u.role === 'admin' ? 'danger' : 'secondary'}"
+                    onclick="toggleAdminRole('${u.id}', '${u.role === 'admin' ? 'user' : 'admin'}')">
+                    ${u.role === 'admin' ? 'Снять админа' : 'Сделать админом'}
+                  </button>
+                </div>
+              ` : ''}
             </div>
-            ${canManage ? `
-              <button class="btn sm ${u.role === 'admin' ? 'danger' : 'secondary'}" style="font-size:12px; padding:6px 10px;"
-                onclick="toggleAdminRole('${u.id}', '${u.role === 'admin' ? 'user' : 'admin'}')">
-                ${u.role === 'admin' ? 'Снять' : 'Админ'}
-              </button>
-            ` : ''}
           </div>
         `;
       }).join('');
