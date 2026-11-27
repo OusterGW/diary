@@ -3,7 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>Diary — Дневник класса</title>
+  <!-- Связь с манифестом PWA -->
+<link rel="manifest" href="manifest.json" />
+<!-- Иконка для вкладки браузера (Favicon) -->
+<link rel="icon" type="image/png" href="icon.png" />
+<!-- Иконка для добавления на экран iPhone (iOS) -->
+<link rel="apple-touch-icon" href="icon.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
