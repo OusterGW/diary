@@ -196,7 +196,7 @@
       opacity: 1;
     }
 
-    /* Плавные GPU-анимации */
+    /* Плавные GPU-анимации (классы автоматически снимаются после завершения) */
     @keyframes tabEnter {
       from { opacity: 0; transform: translate3d(0, 6px, 0); }
       to { opacity: 1; transform: translate3d(0, 0, 0); }
@@ -210,9 +210,9 @@
       to { opacity: 1; transform: translate3d(0, 0, 0); }
     }
 
-    .tab-enter { animation: tabEnter 0.22s var(--ease-ios) both; will-change: transform, opacity; }
-    .day-slide-next { animation: daySlideNext 0.2s var(--ease-ios) both; will-change: transform, opacity; }
-    .day-slide-prev { animation: daySlidePrev 0.2s var(--ease-ios) both; will-change: transform, opacity; }
+    .tab-enter { animation: tabEnter 0.22s var(--ease-ios); }
+    .day-slide-next { animation: daySlideNext 0.2s var(--ease-ios); }
+    .day-slide-prev { animation: daySlidePrev 0.2s var(--ease-ios); }
 
     /* Авторизация */
     .auth-wrap {
@@ -229,7 +229,7 @@
       border-radius: 26px;
       padding: 26px;
       box-shadow: var(--dock-shadow);
-      animation: tabEnter 0.28s var(--ease-ios) both;
+      animation: tabEnter 0.28s var(--ease-ios);
     }
     .auth-brand {
       display: flex;
@@ -258,12 +258,12 @@
       color: var(--text);
       font-size: 13px;
       line-height: 1.45;
-      animation: tabEnter 0.22s var(--ease-ios) both;
+      animation: tabEnter 0.22s var(--ease-ios);
     }
     .auth-notice svg { color: var(--accent); margin-top: 2px; }
     .auth-notice strong { display: block; margin-bottom: 2px; font-size: 14px; }
 
-    /* Верхняя панель с safe-area под чёлку и центрированным заголовком */
+    /* Верхняя панель: заголовок по центру, кнопка темы справа */
     .topbar {
       position: sticky;
       top: 0;
@@ -278,10 +278,10 @@
       width: 100%;
       max-width: var(--app-width);
       margin: 0 auto;
-      padding: 11px 16px;
-      display: flex;
+      padding: 10px 16px;
+      display: grid;
+      grid-template-columns: 38px 1fr 38px;
       align-items: center;
-      justify-content: center;
     }
     .brand {
       display: inline-flex;
@@ -299,8 +299,25 @@
       object-fit: cover;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
     }
+    .theme-toggle-btn {
+      width: 36px;
+      height: 36px;
+      justify-self: end;
+      border: none;
+      border-radius: 50%;
+      background: var(--subtle-bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      transition: transform 0.18s var(--ease-ios), background-color 0.2s ease, color 0.2s ease;
+    }
+    .theme-toggle-btn:active { transform: scale(0.88) rotate(-18deg); }
+    .theme-toggle-btn svg { width: 19px; height: 19px; }
 
-    /* Плавающая нижняя панель (3 вкладки: ДЗ / Участники / Профиль) */
+    /* Плавающая нижняя панель (3 вкладки) */
     .bottom-nav-wrap {
       position: fixed;
       left: 0;
@@ -369,22 +386,6 @@
       padding: 16px 16px calc(98px + var(--safe-bottom));
       flex: 1;
     }
-
-    .avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 700;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-    .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
     /* Вкладки дней недели (Пн–Пт) */
     .days-bar {
@@ -538,6 +539,7 @@
     .btn.secondary { background: var(--subtle-bg); color: var(--text); }
     .btn.danger { background: rgba(255, 59, 48, 0.14); color: var(--red); }
     .btn.sm { padding: 8px 12px; font-size: 13px; border-radius: 10px; }
+    .btn.pill { border-radius: 999px; padding: 9px 22px; font-size: 14px; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
     .stack { display: flex; flex-direction: column; gap: 12px; }
@@ -681,21 +683,21 @@
       color: var(--text);
       opacity: 0.8;
       display: -webkit-box;
-      -webkit-line-clamp: 3;
-      line-clamp: 3;
+      -webkit-line-clamp: 6;
+      line-clamp: 6;
       -webkit-box-orient: vertical;
       overflow: hidden;
       word-break: break-word;
     }
 
     /* Бейджи */
-    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 999px; font-size: 11px; font-weight: 600; width: fit-content; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; width: fit-content; }
     .badge.red { background: rgba(255, 59, 48, 0.14); color: var(--red); }
     .badge.blue { background: var(--accent-soft); color: var(--accent); }
     .badge.orange { background: rgba(255, 149, 0, 0.16); color: var(--orange); }
     .badge.gray { background: var(--subtle-bg); color: var(--muted); }
 
-    /* Сетка участников: 2 в ширину, фото 1:1, подпись ниже, без почты */
+    /* Сетка участников */
     .members-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -764,46 +766,92 @@
       border-radius: 10px;
     }
 
-    /* Страница Профиля (вкладка внизу) */
-    .profile-card {
-      background: var(--surface-solid);
-      border-radius: 22px;
-      padding: 18px;
-      box-shadow: var(--card-shadow);
+    /* Обновлённая страница Профиля */
+    .profile-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 16px 12px 20px;
+      gap: 12px;
     }
+    .profile-hero-avatar {
+      width: 106px;
+      height: 106px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      font-weight: 700;
+      overflow: hidden;
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.14);
+    }
+    .profile-hero-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      cursor: zoom-in;
+    }
+    .profile-hero-name {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      margin: 2px 0 0;
+    }
+    .profile-info-card {
+      background: var(--surface-solid);
+      border-radius: 20px;
+      padding: 14px 16px;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .profile-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+    }
+    .profile-info-row span { color: var(--muted); }
+    .profile-info-row strong {
+      color: var(--text);
+      font-weight: 600;
+      text-align: right;
+      word-break: break-all;
+    }
+    .profile-divider {
+      height: 1px;
+      background: var(--border);
+    }
+
     .avatar-upload-wrap {
       display: flex;
       align-items: center;
       gap: 14px;
+      background: var(--bg);
+      padding: 12px;
+      border-radius: 14px;
     }
     .avatar-large {
-      width: 68px;
-      height: 68px;
-      border-radius: 18px;
-      background: var(--accent);
-      color: #fff;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 700;
       overflow: hidden;
       flex-shrink: 0;
     }
     .avatar-large img { width: 100%; height: 100%; object-fit: cover; }
-    .profile-email-row {
-      padding: 11px 13px;
-      border-radius: 12px;
-      background: var(--bg);
-      font-size: 13px;
-      color: var(--muted);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      word-break: break-all;
-    }
-    .profile-email-row strong { color: var(--text); font-weight: 600; }
 
     /* Модальное окно */
     .modal-backdrop {
@@ -1023,10 +1071,12 @@
   <div id="appView" class="hidden">
     <header class="topbar">
       <div class="topbar-inner">
+        <div></div>
         <div class="brand">
           <img src="icon.png" class="brand-icon" alt="" onerror="this.style.display='none'" />
           <span>Diary</span>
         </div>
+        <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleThemeQuick()" aria-label="Сменить тему"></button>
       </div>
     </header>
 
@@ -1069,11 +1119,7 @@
 
       <!-- СТРАНИЦА ПРОФИЛЬ -->
       <section id="pageProfile" class="hidden">
-        <div class="section-head">
-          <h2>Профиль</h2>
-          <span id="profRoleBadge" class="badge gray"></span>
-        </div>
-        <div id="profileContent"></div>
+        <div id="profileContent" class="stack"></div>
       </section>
     </main>
 
@@ -1111,7 +1157,7 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО УРОКА -->
+  <!-- МОДАЛЬНОЕ ОКНО -->
   <div id="modalBackdrop" class="modal-backdrop" onclick="if(event.target===this) closeModal()">
     <div class="modal" id="modalContent"></div>
   </div>
@@ -1251,7 +1297,10 @@
       grip: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="8" x2="19" y2="8"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="16" x2="19" y2="16"/></svg>`,
       mail: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 6L2 7"/></svg>`,
       dash: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
-      clock: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>`
+      clock: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>`,
+      sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.7" y2="6.7"/><line x1="17.3" y1="17.3" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.7" y2="17.3"/><line x1="17.3" y1="6.7" x2="19.07" y2="4.93"/></svg>`,
+      moon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+      edit: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`
     };
 
     const today = new Date().getDay();
@@ -1269,15 +1318,35 @@
     let suppressNextClick = false;
     let toastTimer = null;
 
-    // --- ТЕМА И ЦВЕТ ВЕРХНЕЙ ПАНЕЛИ (ЧЁЛКИ) ---
+    // --- ТЕМА И КНОПКА ЛУНА / СОЛНЦЕ ---
     const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
 
-    function updateStatusBarColor(theme) {
-      const isDark = theme === 'dark' || (theme === 'auto' && darkMedia.matches);
-      const color = isDark ? '#000000' : '#f2f2f7';
-      const meta = document.getElementById('themeColorMeta');
-      if (meta) meta.setAttribute('content', color);
+    function isDarkActive(theme) {
+      const t = theme || localStorage.getItem('diary_theme') || 'auto';
+      return t === 'dark' || (t === 'auto' && darkMedia.matches);
+    }
+
+    function updateStatusBarAndIcon(theme) {
+      const dark = isDarkActive(theme);
+      const color = dark ? '#000000' : '#f2f2f7';
+
+      // Пересоздаём meta theme-color, чтобы Safari/iOS подхватывал смену
+      const oldMeta = document.getElementById('themeColorMeta');
+      if (oldMeta) oldMeta.remove();
+      const newMeta = document.createElement('meta');
+      newMeta.name = 'theme-color';
+      newMeta.id = 'themeColorMeta';
+      newMeta.content = color;
+      document.head.appendChild(newMeta);
+
       document.documentElement.style.backgroundColor = color;
+      document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) {
+        btn.innerHTML = dark ? ICON.moon : ICON.sun;
+        btn.title = dark ? 'Включить светлую тему' : 'Включить тёмную тему';
+      }
     }
 
     function applyTheme(theme) {
@@ -1285,12 +1354,17 @@
       localStorage.setItem('diary_theme', val);
       if (val === 'auto') document.documentElement.removeAttribute('data-theme');
       else document.documentElement.setAttribute('data-theme', val);
-      updateStatusBarColor(val);
+      updateStatusBarAndIcon(val);
+    }
+
+    function toggleThemeQuick() {
+      const dark = isDarkActive();
+      applyTheme(dark ? 'light' : 'dark');
     }
 
     darkMedia.addEventListener('change', () => {
       if ((localStorage.getItem('diary_theme') || 'auto') === 'auto') {
-        updateStatusBarColor('auto');
+        updateStatusBarAndIcon('auto');
       }
     });
     applyTheme(localStorage.getItem('diary_theme') || 'auto');
@@ -1326,12 +1400,28 @@
     const isAdmin = () => currentProfile && (currentProfile.role === 'admin' || currentProfile.role === 'super_admin');
     const isSuperAdmin = () => currentProfile && currentProfile.role === 'super_admin';
 
-    function playAnim(el, cls) {
+    // Снимаем классы анимации после завершения, чтобы не ломать position: fixed при перетаскивании
+    function clearAnimClasses(el) {
+      if (!el) return;
       el.classList.remove('tab-enter', 'day-slide-next', 'day-slide-prev');
-      requestAnimationFrame(() => el.classList.add(cls));
     }
 
-    // --- ЗАГРУЗКА SUPABASE БЕЗ ЗАВИСАНИЙ ---
+    function playAnim(el, cls) {
+      if (!el) return;
+      clearAnimClasses(el);
+      clearTimeout(el._animTimer);
+      requestAnimationFrame(() => {
+        el.classList.add(cls);
+        const onEnd = () => {
+          clearAnimClasses(el);
+          el.removeEventListener('animationend', onEnd);
+        };
+        el.addEventListener('animationend', onEnd, { once: true });
+        el._animTimer = setTimeout(onEnd, 260);
+      });
+    }
+
+    // --- ЗАГРУЗКА SUPABASE ---
     function loadScript(src, timeoutMs = 6000) {
       return new Promise((resolve, reject) => {
         const s = document.createElement('script');
@@ -1423,7 +1513,6 @@
     async function initApp() {
       try {
         await ensureSupabase();
-        // Отключаем lock Web Locks API, который иногда зависает в Safari/PWA
         db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
           auth: {
             persistSession: true,
@@ -1583,7 +1672,7 @@
       if (db) await db.auth.signOut();
     }
 
-    // --- ПРОФИЛЬ (ОТДЕЛЬНАЯ ВКЛАДКА ВНИЗУ) ---
+    // --- ПРОФИЛЬ (АВАТАР ПО ЦЕНТРУ + КНОПКА «ИЗМЕНИТЬ») ---
     async function loadMyProfile() {
       const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
       currentProfile = data || { id: currentUser.id, email: currentUser.email, full_name: currentUser.email, role: 'user' };
@@ -1597,83 +1686,93 @@
       const badge1 = document.getElementById('myRoleBadge');
       badge1.textContent = 'Вы: ' + (roleLabels[currentProfile.role] || 'Ученик');
       badge1.className = roleCls;
-
-      const badge2 = document.getElementById('profRoleBadge');
-      badge2.textContent = roleLabels[currentProfile.role] || 'Ученик';
-      badge2.className = roleCls;
     }
 
     function renderProfilePage() {
       const container = document.getElementById('profileContent');
       if (!container || !currentProfile) return;
 
-      const themes = ['auto', 'light', 'dark'];
-      const currentTheme = localStorage.getItem('diary_theme') || 'auto';
-      const themeIdx = Math.max(0, themes.indexOf(currentTheme));
       const name = safeFullName(currentProfile);
       const email = currentProfile.email || currentUser?.email || '';
+      const roleLabels = { super_admin: 'Главный админ', admin: 'Админ', user: 'Ученик' };
+      const roleCls = 'badge ' + (currentProfile.role === 'super_admin' ? 'orange' : currentProfile.role === 'admin' ? 'blue' : 'gray');
       const avatarHtml = currentProfile.avatar_url
-        ? `<img src="${esc(currentProfile.avatar_url)}" alt="" />`
-        : name[0].toUpperCase();
+        ? `<img src="${esc(currentProfile.avatar_url)}" alt="${esc(name)}" onclick="openLightbox('${esc(currentProfile.avatar_url)}')" />`
+        : esc(name[0].toUpperCase());
 
       container.innerHTML = `
-        <div class="profile-card stack">
+        <div class="profile-hero">
+          <div class="profile-hero-avatar">${avatarHtml}</div>
+          <button class="btn pill" onclick="openProfileEditModal()">
+            ${ICON.edit}
+            <span>Изменить</span>
+          </button>
+          <div class="profile-hero-name">${esc(name)}</div>
+          <span class="${roleCls}">${roleLabels[currentProfile.role] || 'Ученик'}</span>
+        </div>
+
+        <div class="profile-info-card">
+          <div class="profile-info-row">
+            <span>Почта</span>
+            <strong>${esc(email)}</strong>
+          </div>
+          <div class="profile-divider"></div>
+          <div class="profile-info-row">
+            <span>Статус</span>
+            <strong>${roleLabels[currentProfile.role] || 'Ученик'}</strong>
+          </div>
+        </div>
+
+        <button class="btn danger" style="width:100%;" onclick="signOut()">Выйти из аккаунта</button>
+      `;
+    }
+
+    function openProfileEditModal() {
+      if (!currentProfile) return;
+      const name = safeFullName(currentProfile);
+      const avatarHtml = currentProfile.avatar_url
+        ? `<img src="${esc(currentProfile.avatar_url)}" alt="" />`
+        : esc(name[0].toUpperCase());
+
+      document.getElementById('modalContent').innerHTML = `
+        <div class="modal-head">
+          <h3>Редактировать профиль</h3>
+          <button class="close-x" onclick="closeModal()">${ICON.close}</button>
+        </div>
+        <div class="stack">
           <div class="avatar-upload-wrap">
-            <div class="avatar-large" id="profAvatarPreview">${avatarHtml}</div>
+            <div class="avatar-large" id="editAvatarPreview">${avatarHtml}</div>
             <div class="stack" style="gap:5px; flex:1;">
               <label class="btn sm secondary" style="cursor:pointer; width:fit-content;">
                 ${ICON.photo}
-                <span>Изменить фото</span>
+                <span>Выбрать фото</span>
                 <input type="file" accept="image/*" class="hidden" onchange="uploadAvatar(this.files[0])" />
               </label>
               <div style="font-size:12px; color:var(--muted);">Фото автоматически сожмётся</div>
             </div>
           </div>
 
-          <div class="profile-email-row">
-            <span>Почта</span>
-            <strong>${esc(email)}</strong>
-          </div>
-
           <div class="field">
             <label>Имя и фамилия</label>
-            <input id="profNameInput" type="text" value="${esc(name)}" />
-          </div>
-
-          <div class="field">
-            <label>Оформление</label>
-            <div class="segmented" id="themeSegmented" style="--cols:3;">
-              <div class="seg-slider" id="themeSlider" style="--idx:${themeIdx};"></div>
-              <button data-t="auto" class="${currentTheme === 'auto' ? 'active' : ''}" onclick="setThemeFromProfile('auto', 0)">Авто</button>
-              <button data-t="light" class="${currentTheme === 'light' ? 'active' : ''}" onclick="setThemeFromProfile('light', 1)">Светлая</button>
-              <button data-t="dark" class="${currentTheme === 'dark' ? 'active' : ''}" onclick="setThemeFromProfile('dark', 2)">Тёмная</button>
-            </div>
+            <input id="profNameInput" type="text" value="${esc(name)}" placeholder="Ваше имя" />
           </div>
 
           <div id="profMsg" class="msg"></div>
 
-          <div class="row" style="justify-content:space-between; margin-top:4px;">
-            <button class="btn danger sm" onclick="signOut()">Выйти из аккаунта</button>
-            <button class="btn sm" onclick="saveProfileName()">Сохранить</button>
+          <div class="row" style="justify-content:flex-end; gap:8px; margin-top:4px;">
+            <button class="btn secondary sm" onclick="closeModal()">Отмена</button>
+            <button id="saveProfBtn" class="btn sm" onclick="saveProfileName()">Сохранить</button>
           </div>
         </div>
       `;
-    }
-
-    function setThemeFromProfile(theme, idx) {
-      applyTheme(theme);
-      const slider = document.getElementById('themeSlider');
-      if (slider) slider.style.setProperty('--idx', idx);
-      document.querySelectorAll('#themeSegmented button').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.t === theme);
-      });
+      openModal();
     }
 
     async function uploadAvatar(file) {
       if (!file) return;
       const msg = document.getElementById('profMsg');
       msg.className = 'msg';
-      msg.textContent = 'Сжатие и загрузка...';
+      msg.textContent = 'Сжатие и загрузка фото...';
 
       try {
         const compressed = await compressImage(file, 500, 0.84);
@@ -1690,11 +1789,13 @@
         if (dbErr) throw dbErr;
 
         await loadMyProfile();
-        const prev = document.getElementById('profAvatarPreview');
+        renderProfilePage();
+        loadMembers(true);
+
+        const prev = document.getElementById('editAvatarPreview');
         if (prev) prev.innerHTML = `<img src="${esc(pub.publicUrl)}" alt="" />`;
         msg.className = 'msg ok';
-        msg.textContent = 'Фото профиля обновлено!';
-        loadMembers(true);
+        msg.textContent = 'Фото обновлено!';
       } catch (err) {
         msg.textContent = 'Ошибка: ' + err.message;
       }
@@ -1702,18 +1803,29 @@
 
     async function saveProfileName() {
       const msg = document.getElementById('profMsg');
+      const btn = document.getElementById('saveProfBtn');
       msg.className = 'msg';
       msg.textContent = '';
+
       const newName = document.getElementById('profNameInput').value.trim();
       if (!newName) { msg.textContent = 'Имя не может быть пустым'; return; }
 
+      btn.disabled = true;
+      btn.textContent = 'Сохранение...';
+
       const { error } = await db.from('profiles').update({ full_name: newName }).eq('id', currentUser.id);
-      if (error) { msg.textContent = error.message; return; }
+      if (error) {
+        msg.textContent = error.message;
+        btn.disabled = false;
+        btn.textContent = 'Сохранить';
+        return;
+      }
 
       await loadMyProfile();
+      renderProfilePage();
       loadMembers(true);
-      msg.className = 'msg ok';
-      msg.textContent = 'Имя сохранено!';
+      closeModal();
+      showToast('Профиль обновлён');
     }
 
     // --- ОСНОВНОЕ РАСПИСАНИЕ ---
@@ -1951,7 +2063,7 @@
       if (adminMode) attachDragHandlers();
     }
 
-    // --- ПЕРЕТАСКИВАНИЕ УРОКОВ ---
+    // --- ПЕРЕТАСКИВАНИЕ УРОКОВ БЕЗ СМЕЩЕНИЯ ОТНОСИТЕЛЬНО ПАЛЬЦА ---
     function attachDragHandlers() {
       document.querySelectorAll('#lessonsList .drag-handle').forEach(handle => {
         handle.addEventListener('pointerdown', startLessonDrag);
@@ -1961,6 +2073,10 @@
     function startLessonDrag(e) {
       e.preventDefault();
       e.stopPropagation();
+
+      // Убираем любые активные классы анимации, чтобы у родителей не было transform
+      clearAnimClasses(document.getElementById('pageHw'));
+      clearAnimClasses(document.getElementById('lessonsList'));
 
       const list = document.getElementById('lessonsList');
       const card = e.currentTarget.closest('.lesson-card');
