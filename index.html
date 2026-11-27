@@ -689,11 +689,15 @@
     .lesson-preview {
       margin-top: 4px;
       font-size: 13px;
+      line-height: 1.35;
       color: var(--text);
       opacity: 0.8;
-      white-space: nowrap;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
       overflow: hidden;
-      text-overflow: ellipsis;
+      word-break: break-word;
     }
 
     /* Бейджи */
