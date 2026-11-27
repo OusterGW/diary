@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" id="themeColorMeta" content="#f2f2f7" />
   <title>Diary — Дневник класса</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/png" href="icon.png" />
@@ -1642,14 +1643,30 @@
       openModal();
     }
 
-    function setThemeFromModal(theme, idx) {
-      applyTheme(theme);
-      const slider = document.getElementById('themeSlider');
-      if (slider) slider.style.setProperty('--idx', idx);
-      document.querySelectorAll('#themeSegmented button').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.t === theme);
-      });
+    const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function updateStatusBarColor(theme) {
+      const isDark = theme === 'dark' || (theme === 'auto' && darkMedia.matches);
+      const color = isDark ? '#000000' : '#f2f2f7';
+      const meta = document.getElementById('themeColorMeta');
+      if (meta) meta.setAttribute('content', color);
+      document.documentElement.style.backgroundColor = color;
     }
+
+    function applyTheme(theme) {
+      const val = theme || 'auto';
+      localStorage.setItem('diary_theme', val);
+      if (val === 'auto') document.documentElement.removeAttribute('data-theme');
+      else document.documentElement.setAttribute('data-theme', val);
+      updateStatusBarColor(val);
+    }
+
+    darkMedia.addEventListener('change', () => {
+      if ((localStorage.getItem('diary_theme') || 'auto') === 'auto') {
+        updateStatusBarColor('auto');
+      }
+    });
+    applyTheme(localStorage.getItem('diary_theme') || 'auto');
 
     async function uploadAvatar(file) {
       if (!file) return;
