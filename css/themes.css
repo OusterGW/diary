@@ -1,0 +1,75 @@
+:root {
+  --bg: #f2f2f7;
+  --surface-solid: #ffffff;
+  --topbar: rgba(242, 242, 247, 0.92);
+  --dock-bg: rgba(255, 255, 255, 0.88);
+  --input-bg: #ffffff;
+  --subtle-bg: rgba(118, 118, 128, 0.12);
+  --seg-active: #ffffff;
+  --cancelled-bg: rgba(255, 59, 48, 0.09);
+  --window-bg: rgba(142, 142, 147, 0.14);
+  --text: #1c1c1e;
+  --muted: #8e8e93;
+  --border: rgba(60, 60, 67, 0.12);
+  --accent: #007aff;
+  --accent-soft: rgba(0, 122, 255, 0.12);
+  --green: #34c759;
+  --red: #ff3b30;
+  --orange: #ff9500;
+  --card-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  --dock-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  --drag-shadow: 0 16px 38px rgba(0, 0, 0, 0.18);
+  --radius: 18px;
+  --app-width: 520px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000;
+    --surface-solid: #1c1c1e;
+    --topbar: rgba(0, 0, 0, 0.9);
+    --dock-bg: rgba(34, 34, 38, 0.9);
+    --input-bg: #2c2c2e;
+    --subtle-bg: rgba(118, 118, 128, 0.24);
+    --seg-active: #3a3a3c;
+    --cancelled-bg: rgba(255, 69, 58, 0.14);
+    --window-bg: rgba(142, 142, 147, 0.15);
+    --text: #f5f5f7;
+    --muted: #98989d;
+    --border: rgba(255, 255, 255, 0.11);
+    --accent: #0a84ff;
+    --accent-soft: rgba(10, 132, 255, 0.16);
+    --green: #30d158;
+    --red: #ff453a;
+    --orange: #ff9f0a;
+    --card-shadow: none;
+    --dock-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
+    --drag-shadow: 0 18px 42px rgba(0, 0, 0, 0.7);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #000000;
+  --surface-solid: #1c1c1e;
+  --topbar: rgba(0, 0, 0, 0.9);
+  --dock-bg: rgba(34, 34, 38, 0.9);
+  --input-bg: #2c2c2e;
+  --subtle-bg: rgba(118, 118, 128, 0.24);
+  --seg-active: #3a3a3c;
+  --cancelled-bg: rgba(255, 69, 58, 0.14);
+  --window-bg: rgba(142, 142, 147, 0.15);
+  --text: #f5f5f7;
+  --muted: #98989d;
+  --border: rgba(255, 255, 255, 0.11);
+  --accent: #0a84ff;
+  --accent-soft: rgba(10, 132, 255, 0.16);
+  --green: #30d158;
+  --red: #ff453a;
+  --orange: #ff9f0a;
+  --card-shadow: none;
+  --dock-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
+  --drag-shadow: 0 18px 42px rgba(0, 0, 0, 0.7);
+}
