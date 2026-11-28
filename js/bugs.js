@@ -3,9 +3,9 @@ let bugsLoadedOnce = false;
 let pendingBugMedia = [];
 
 const BUG_STATUSES = {
-  pending: { label: 'На проверке', badgeClass: 'orange' },
-  in_progress: { label: 'Решается', badgeClass: 'blue' },
-  resolved: { label: 'Решено', badgeClass: 'green' }
+  pending: { label: 'На проверке', badgeClass: 'orange', idx: 0 },
+  in_progress: { label: 'Решается', badgeClass: 'blue', idx: 1 },
+  resolved: { label: 'Решено', badgeClass: 'green', idx: 2 }
 };
 
 function formatBugTime(iso) {
@@ -77,64 +77,100 @@ function renderBugs() {
     const media = normalizeBugMedia(b.media_urls);
     const authorName = (b.profiles?.full_name || 'Пользователь').trim();
     const authorAvatar = b.profiles?.avatar_url
-      ? `<img src="${esc(b.profiles.avatar_url)}" alt="${esc(authorName)}" onclick="openLightbox('${esc(b.profiles.avatar_url)}')" />`
+      ? `<img src="${esc(b.profiles.avatar_url)}" alt="${esc(authorName)}" />`
       : esc(authorName[0].toUpperCase());
 
-    const mediaHtml = media.length ? `
-      <div class="bug-media-grid">
-        ${media.map(m => m.type === 'video'
-          ? `<div class="bug-media-item video"><video src="${esc(m.url)}" controls playsinline preload="metadata"></video></div>`
-          : `<div class="bug-media-item"><img src="${esc(m.url)}" alt="Фото бага" onclick="openLightbox('${esc(m.url)}')" /></div>`
-        ).join('')}
-      </div>
-    ` : '';
+    const metaParts = [];
+    if (ownerView) metaParts.push(esc(authorName));
+    const timeStr = formatBugTime(b.created_at);
+    if (timeStr) metaParts.push(esc(timeStr));
 
     return `
-      <article class="bug-card">
-        <div class="bug-card-top">
-          ${ownerView ? `
-            <div class="bug-author">
-              <div class="bug-avatar">${authorAvatar}</div>
-              <div>
-                <div class="bug-author-name">${esc(authorName)}</div>
-                <div class="bug-time">${esc(formatBugTime(b.created_at))}</div>
-              </div>
-            </div>
-          ` : `
-            <div class="bug-time">${esc(formatBugTime(b.created_at))}</div>
-          `}
-          <span class="badge ${st.badgeClass}">${st.label}</span>
+      <div class="bug-card" onclick="openBugView(${b.id})">
+        ${ownerView ? `<div class="bug-avatar">${authorAvatar}</div>` : ''}
+        <div class="bug-info">
+          <div class="bug-title-row">
+            <span class="bug-title">${esc(b.title)}</span>
+            ${media.length ? `<span class="badge blue">${ICON.photoSm} ${media.length}</span>` : ''}
+          </div>
+          ${metaParts.length ? `<div class="bug-meta">${metaParts.join(' · ')}</div>` : ''}
+          ${b.description ? `<div class="bug-preview">${esc(b.description)}</div>` : ''}
         </div>
-
-        <div class="bug-title">${esc(b.title)}</div>
-
-        ${b.description ? `<div class="bug-text">${linkifyText(b.description)}</div>` : ''}
-
-        ${b.steps ? `
-          <div class="bug-steps">
-            <div class="bug-steps-label">Путь воспроизведения</div>
-            <div>${esc(b.steps)}</div>
-          </div>
-        ` : ''}
-
-        ${mediaHtml}
-
-        ${ownerView ? `
-          <div class="bug-admin-bar">
-            <div class="segmented bug-status-seg" style="--cols:3;">
-              <div class="seg-slider" style="--idx:${b.status === 'in_progress' ? 1 : b.status === 'resolved' ? 2 : 0};"></div>
-              <button type="button" class="${b.status === 'pending' ? 'active' : ''}" onclick="updateBugStatus(${b.id}, 'pending')">На проверке</button>
-              <button type="button" class="${b.status === 'in_progress' ? 'active' : ''}" onclick="updateBugStatus(${b.id}, 'in_progress')">Решается</button>
-              <button type="button" class="${b.status === 'resolved' ? 'active' : ''}" onclick="updateBugStatus(${b.id}, 'resolved')">Решено</button>
-            </div>
-            <button type="button" class="btn danger sm bug-del-btn" onclick="deleteBug(${b.id})" title="Удалить">
-              ${ICON.trash}
-            </button>
-          </div>
-        ` : ''}
-      </article>
+        <span class="badge ${st.badgeClass} bug-status-pill">${st.label}</span>
+      </div>
     `;
   }).join('');
+}
+
+function openBugView(bugId) {
+  const b = bugsCache.find(x => x.id === bugId);
+  if (!b) return;
+
+  const ownerView = isSuperAdmin();
+  const st = BUG_STATUSES[b.status] || BUG_STATUSES.pending;
+  const media = normalizeBugMedia(b.media_urls);
+  const authorName = (b.profiles?.full_name || 'Пользователь').trim();
+  const authorAvatar = b.profiles?.avatar_url
+    ? `<img src="${esc(b.profiles.avatar_url)}" alt="${esc(authorName)}" onclick="openLightbox('${esc(b.profiles.avatar_url)}')" />`
+    : esc(authorName[0].toUpperCase());
+
+  const mediaHtml = media.length ? `
+    <div class="bug-media-grid">
+      ${media.map(m => m.type === 'video'
+        ? `<div class="bug-media-item video"><video src="${esc(m.url)}" controls playsinline preload="metadata"></video></div>`
+        : `<div class="bug-media-item"><img src="${esc(m.url)}" alt="Фото бага" onclick="openLightbox('${esc(m.url)}')" /></div>`
+      ).join('')}
+    </div>
+  ` : '';
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-head">
+      <h3>${esc(b.title)}</h3>
+      <button class="close-x" onclick="closeModal()">${ICON.close}</button>
+    </div>
+    <div class="stack">
+      <div class="bug-card-top">
+        ${ownerView ? `
+          <div class="bug-author">
+            <div class="bug-avatar">${authorAvatar}</div>
+            <div>
+              <div class="bug-author-name">${esc(authorName)}</div>
+              <div class="bug-time">${esc(formatBugTime(b.created_at))}</div>
+            </div>
+          </div>
+        ` : `
+          <div class="bug-time">${esc(formatBugTime(b.created_at))}</div>
+        `}
+        <span id="bugViewBadge" class="badge ${st.badgeClass}">${st.label}</span>
+      </div>
+
+      ${b.description ? `<div class="bug-desc-box">${linkifyText(b.description)}</div>` : ''}
+
+      ${b.steps ? `
+        <div class="bug-steps">
+          <div class="bug-steps-label">Путь воспроизведения</div>
+          <div class="bug-steps-text">${esc(b.steps)}</div>
+        </div>
+      ` : ''}
+
+      ${mediaHtml}
+
+      ${ownerView ? `
+        <div class="bug-admin-bar">
+          <div id="bugStatusSeg" class="segmented bug-status-seg" style="--cols:3;">
+            <div id="bugStatusSlider" class="seg-slider" style="--idx:${st.idx};"></div>
+            <button type="button" data-st="pending" class="${b.status === 'pending' ? 'active' : ''}" onclick="updateBugStatus(${b.id}, 'pending')">На проверке</button>
+            <button type="button" data-st="in_progress" class="${b.status === 'in_progress' ? 'active' : ''}" onclick="updateBugStatus(${b.id}, 'in_progress')">Решается</button>
+            <button type="button" data-st="resolved" class="${b.status === 'resolved' ? 'active' : ''}" onclick="updateBugStatus(${b.id}, 'resolved')">Решено</button>
+          </div>
+          <button type="button" class="btn danger sm bug-del-btn" onclick="deleteBug(${b.id})" title="Удалить">
+            ${ICON.trash}
+          </button>
+        </div>
+      ` : ''}
+    </div>
+  `;
+  openModal();
 }
 
 function openBugModal() {
@@ -285,17 +321,33 @@ async function submitBugReport() {
   }
 }
 
+function syncBugModalStatus(statusKey) {
+  const st = BUG_STATUSES[statusKey] || BUG_STATUSES.pending;
+  const badge = document.getElementById('bugViewBadge');
+  if (badge) {
+    badge.className = `badge ${st.badgeClass}`;
+    badge.textContent = st.label;
+  }
+  const slider = document.getElementById('bugStatusSlider');
+  if (slider) slider.style.setProperty('--idx', st.idx);
+  document.querySelectorAll('#bugStatusSeg button').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.st === statusKey);
+  });
+}
+
 async function updateBugStatus(bugId, newStatus) {
   const item = bugsCache.find(b => b.id === bugId);
   if (!item || item.status === newStatus) return;
 
   const prevStatus = item.status;
   item.status = newStatus;
+  syncBugModalStatus(newStatus);
   renderBugs();
 
   const { error } = await db.from('bug_reports').update({ status: newStatus }).eq('id', bugId);
   if (error) {
     item.status = prevStatus;
+    syncBugModalStatus(prevStatus);
     renderBugs();
     alert('Не удалось обновить статус: ' + error.message);
   } else {
@@ -310,6 +362,7 @@ async function deleteBug(bugId) {
     alert('Ошибка удаления: ' + error.message);
     return;
   }
+  closeModal();
   await loadBugs();
   showToast('Отчёт удалён');
 }
