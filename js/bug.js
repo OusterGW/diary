@@ -1,4 +1,5 @@
 let bugsCache = [];
+let bugsLoadedOnce = false;
 let pendingBugMedia = [];
 
 const BUG_STATUSES = {
