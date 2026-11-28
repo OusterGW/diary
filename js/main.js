@@ -12,7 +12,7 @@ function isDarkActive(theme) {
 
 function updateStatusBarAndIcon(theme) {
   const dark = isDarkActive(theme);
-  const color = dark ? '#000000' : '#f2f2f7';
+  const color = dark ? '#000000' : '#f5f5f7';
 
   const oldMeta = document.getElementById('themeColorMeta');
   if (oldMeta) oldMeta.remove();
