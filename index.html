@@ -12,9 +12,6 @@
   <link rel="apple-touch-icon" href="icon.png" />
   <link rel="stylesheet" href="css/theme.css" />
   <link rel="stylesheet" href="css/styles.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 <body>
 
@@ -71,7 +68,13 @@
   <div id="appView" class="hidden">
     <header class="topbar">
       <div class="topbar-inner">
-        <div></div>
+        <button id="menuToggleBtn" class="icon-nav-btn" onclick="toggleTopMenu()" aria-label="Меню">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="4" y1="7" x2="20" y2="7"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="17" x2="20" y2="17"></line>
+          </svg>
+        </button>
         <div class="brand">
           <img src="icon.png" class="brand-icon" alt="" onerror="this.style.display='none'" />
           <span>Diary</span>
@@ -79,6 +82,31 @@
         <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleThemeQuick()" aria-label="Сменить тему"></button>
       </div>
     </header>
+
+    <!-- ВЫПАДАЮЩЕЕ МЕНЮ СЛЕВА СВЕРХУ -->
+    <div id="topMenuBackdrop" class="top-menu-backdrop" onclick="closeTopMenu()"></div>
+    <div id="topMenu" class="top-menu" role="menu">
+      <button id="menuItemProfile" class="top-menu-item" onclick="openPageFromMenu('profile')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"></circle>
+          <path d="M4 20c0-3.87 3.58-7 8-7s8 3.13 8 7"></path>
+        </svg>
+        <span>Профиль</span>
+      </button>
+      <div class="top-menu-divider"></div>
+      <button id="menuItemBugs" class="top-menu-item" onclick="openPageFromMenu('bugs')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 7a4 4 0 0 1 8 0"></path>
+          <rect x="6" y="7" width="12" height="13" rx="6"></rect>
+          <line x1="6" y1="13" x2="18" y2="13"></line>
+          <line x1="3" y1="10" x2="6" y2="11"></line>
+          <line x1="21" y1="10" x2="18" y2="11"></line>
+          <line x1="3" y1="16" x2="6.3" y2="15"></line>
+          <line x1="21" y1="16" x2="17.7" y2="15"></line>
+        </svg>
+        <span>Отправить баг</span>
+      </button>
+    </div>
 
     <main class="container">
       <!-- СТРАНИЦА ДЗ -->
@@ -120,9 +148,20 @@
       <section id="pageProfile" class="hidden">
         <div id="profileContent" class="stack"></div>
       </section>
+
+      <!-- СТРАНИЦА ОТПРАВИТЬ БАГ -->
+      <section id="pageBugs" class="hidden">
+        <div class="section-head">
+          <h2 id="bugsPageTitle">Отправить баг</h2>
+          <button id="addBugBtn" class="btn sm" onclick="openBugModal()" aria-label="Добавить отзыв">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+        <div id="bugsList" class="stack"></div>
+      </section>
     </main>
 
-    <!-- НИЖНЯЯ НАВИГАЦИЯ -->
+    <!-- НИЖНЯЯ НАВИГАЦИЯ (2 ВКЛАДКИ) -->
     <div class="bottom-nav-wrap">
       <nav class="bottom-nav">
         <div class="nav-slider" id="navSlider"></div>
@@ -144,13 +183,6 @@
             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
           </svg>
           <span>Участники</span>
-        </button>
-        <button id="navProfile" class="nav-btn" onclick="switchPage('profile')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="8" r="4"></circle>
-            <path d="M4 20c0-3.87 3.58-7 8-7s8 3.13 8 7"></path>
-          </svg>
-          <span>Профиль</span>
         </button>
       </nav>
     </div>
@@ -193,6 +225,7 @@
   <script src="js/lessons.js"></script>
   <script src="js/members.js"></script>
   <script src="js/profile.js"></script>
+  <script src="js/bugs.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

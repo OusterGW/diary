@@ -57,6 +57,26 @@ darkMedia.addEventListener('change', () => {
 });
 applyTheme(localStorage.getItem('diary_theme') || 'auto');
 
+// --- Выпадающее меню слева сверху ---
+function toggleTopMenu() {
+  const menu = document.getElementById('topMenu');
+  const backdrop = document.getElementById('topMenuBackdrop');
+  if (!menu || !backdrop) return;
+  const willOpen = !menu.classList.contains('open');
+  menu.classList.toggle('open', willOpen);
+  backdrop.classList.toggle('open', willOpen);
+}
+
+function closeTopMenu() {
+  document.getElementById('topMenu')?.classList.remove('open');
+  document.getElementById('topMenuBackdrop')?.classList.remove('open');
+}
+
+function openPageFromMenu(page) {
+  closeTopMenu();
+  switchPage(page);
+}
+
 // --- Утилиты UI ---
 function showToast(text) {
   const el = document.getElementById('toast');
@@ -102,6 +122,7 @@ function playAnim(el, cls) {
 }
 
 function openModal() {
+  closeTopMenu();
   document.getElementById('modalBackdrop').classList.add('open');
 }
 
@@ -121,33 +142,48 @@ function closeLightbox() {
 // --- Навигация ---
 function switchPage(page, animate = true) {
   if (currentPage === page && animate) return;
+  closeTopMenu();
   currentPage = page;
 
-  const pages = ['hw', 'members', 'profile'];
-  const idx = Math.max(0, pages.indexOf(page));
+  const pageMap = {
+    hw: document.getElementById('pageHw'),
+    members: document.getElementById('pageMembers'),
+    profile: document.getElementById('pageProfile'),
+    bugs: document.getElementById('pageBugs')
+  };
 
-  const pageHw = document.getElementById('pageHw');
-  const pageMembers = document.getElementById('pageMembers');
-  const pageProfile = document.getElementById('pageProfile');
+  Object.entries(pageMap).forEach(([key, el]) => {
+    if (el) el.classList.toggle('hidden', key !== page);
+  });
 
-  document.getElementById('navSlider').style.setProperty('--idx', idx);
-  document.getElementById('navHw').classList.toggle('active', page === 'hw');
-  document.getElementById('navMembers').classList.toggle('active', page === 'members');
-  document.getElementById('navProfile').classList.toggle('active', page === 'profile');
+  // Нижняя панель (ДЗ / Участники)
+  const navSlider = document.getElementById('navSlider');
+  const isBottomTab = page === 'hw' || page === 'members';
+  if (navSlider) {
+    navSlider.classList.toggle('hidden-slider', !isBottomTab);
+    if (isBottomTab) navSlider.style.setProperty('--idx', page === 'hw' ? 0 : 1);
+  }
+  document.getElementById('navHw')?.classList.toggle('active', page === 'hw');
+  document.getElementById('navMembers')?.classList.toggle('active', page === 'members');
 
-  pageHw.classList.toggle('hidden', page !== 'hw');
-  pageMembers.classList.toggle('hidden', page !== 'members');
-  pageProfile.classList.toggle('hidden', page !== 'profile');
+  // Подсветка активного пункта в верхнем меню
+  document.getElementById('menuItemProfile')?.classList.toggle('active', page === 'profile');
+  document.getElementById('menuItemBugs')?.classList.toggle('active', page === 'bugs');
 
-  const activeEl = page === 'hw' ? pageHw : page === 'members' ? pageMembers : pageProfile;
-  if (animate) playAnim(activeEl, 'tab-enter');
+  const activeEl = pageMap[page];
+  if (animate && activeEl) playAnim(activeEl, 'tab-enter');
 
   if (page === 'hw') loadHwData(true);
   else if (page === 'members') loadMembers(true);
-  else renderProfilePage();
+  else if (page === 'profile') renderProfilePage();
+  else if (page === 'bugs') {
+    const titleEl = document.getElementById('bugsPageTitle');
+    if (titleEl) titleEl.textContent = isSuperAdmin() ? 'Все баги и отзывы' : 'Отправить баг';
+    loadBugs(true);
+  }
 }
 
-// --- Экран загрузки и инициализация ---
+// --- Экран загрузки и запуск ---
 function showSplashError(text) {
   const sp = document.getElementById('splashSpinner');
   const errBox = document.getElementById('splashError');
@@ -187,7 +223,7 @@ async function enterApp(user) {
   try {
     const savedPage = sessionStorage.getItem('diary_restore_page');
     const savedDay = Number(sessionStorage.getItem('diary_restore_day'));
-    if (savedPage && ['hw', 'members', 'profile'].includes(savedPage)) restoredPage = savedPage;
+    if (savedPage && ['hw', 'members', 'profile', 'bugs'].includes(savedPage)) restoredPage = savedPage;
     if (savedDay >= 1 && savedDay <= 5) selectedDay = savedDay;
     sessionStorage.removeItem('diary_restore_page');
     sessionStorage.removeItem('diary_restore_day');
@@ -199,6 +235,7 @@ async function enterApp(user) {
   await loadHwData();
   renderProfilePage();
   await loadMembers(true);
+  if (restoredPage === 'bugs') await loadBugs();
 
   document.getElementById('authView').classList.add('hidden');
   document.getElementById('appView').classList.remove('hidden');
@@ -209,6 +246,7 @@ async function enterApp(user) {
 }
 
 function showAuthScreen() {
+  closeTopMenu();
   currentUser = null;
   currentProfile = null;
   document.getElementById('appView').classList.add('hidden');
