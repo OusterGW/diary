@@ -26,15 +26,16 @@ function renderProfilePage() {
   container.innerHTML = `
     <div class="profile-hero">
       <div class="profile-hero-avatar">${avatarHtml}</div>
-      <button class="btn pill" onclick="openProfileEditModal()">
-        ${ICON.edit}
-        <span>Изменить</span>
-      </button>
       <div class="profile-hero-name">${esc(name)}</div>
       <span class="${roleCls}">${roleLabels[currentProfile.role] || 'Ученик'}</span>
+      <div class="profile-actions">
+        <button class="btn profile-edit-btn" onclick="openProfileEditModal()">
+          ${ICON.edit}
+          <span>Изменить</span>
+        </button>
+        <button class="btn danger profile-logout-btn" onclick="signOut()">Выйти</button>
+      </div>
     </div>
-
-    <button class="btn danger" style="width:100%;" onclick="signOut()">Выйти из аккаунта</button>
   `;
 }
 
