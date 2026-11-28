@@ -42,12 +42,13 @@ async function loadBugs(silent = false) {
     .order('created_at', { ascending: false });
 
   if (error) {
-    if (!silent && list) list.innerHTML = `<div class="empty">${esc(error.message)}</div>`;
+    if (list) list.innerHTML = `<div class="empty">Ошибка: ${esc(error.message)}</div>`;
     return;
   }
 
   const rows = data || [];
-  if (silent && JSON.stringify(rows) === JSON.stringify(bugsCache)) return;
+  if (silent && bugsLoadedOnce && JSON.stringify(rows) === JSON.stringify(bugsCache)) return;
+  bugsLoadedOnce = true;
   bugsCache = rows;
   renderBugs();
 }
